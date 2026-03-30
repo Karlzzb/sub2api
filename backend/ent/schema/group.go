@@ -157,6 +157,23 @@ func (Group) Fields() []ent.Field {
 			MaxLen(100).
 			Default("").
 			Comment("默认映射模型 ID，当账号级映射找不到时使用此值"),
+
+		// Package settings (Phase 2)
+		field.Int("frequency_period").
+			Default(1).
+			Comment("频次限制周期（小时）"),
+		field.Int("max_concurrent").
+			Default(3).
+			Comment("最大并发数"),
+		field.Bool("enable_anti_ban").
+			Default(false).
+			Comment("是否启用防封号策略"),
+		field.Bool("session_isolation").
+			Default(false).
+			Comment("会话隔离开关"),
+		field.Bool("traffic_jitter").
+			Default(false).
+			Comment("流量伪装开关"),
 	}
 }
 
@@ -174,6 +191,7 @@ func (Group) Edges() []ent.Edge {
 			Through("user_allowed_groups", UserAllowedGroup.Type),
 		// 注意：fallback_group_id 直接作为字段使用，不定义 edge
 		// 这样允许多个分组指向同一个降级分组（M2O 关系）
+		// PackageChannel edge will be added after PackageChannel schema is created (Task 3)
 	}
 }
 
@@ -186,5 +204,6 @@ func (Group) Indexes() []ent.Index {
 		index.Fields("is_exclusive"),
 		index.Fields("deleted_at"),
 		index.Fields("sort_order"),
+		index.Fields("frequency_period"),
 	}
 }

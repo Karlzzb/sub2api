@@ -23,6 +23,14 @@ const (
 	PlatformGemini      = "gemini"
 	PlatformAntigravity = "antigravity"
 	PlatformSora        = "sora"
+	PlatformGLM         = "glm"
+	PlatformMiniMax     = "minimax"
+)
+
+// Platform Default Base URLs
+const (
+	DefaultBaseURLGLM       = "https://open.bigmodel.cn/api/paas/v4"
+	DefaultBaseURLMiniMax   = "https://api.minimax.io"
 )
 
 // Account type constants

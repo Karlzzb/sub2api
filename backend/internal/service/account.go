@@ -548,7 +548,17 @@ func (a *Account) GetBaseURL() string {
 	}
 	baseURL := a.GetCredential("base_url")
 	if baseURL == "" {
-		return "https://api.anthropic.com"
+		// 根据 platform 返回默认 URL
+		switch a.Platform {
+		case PlatformGLM:
+			return domain.DefaultBaseURLGLM
+		case PlatformMiniMax:
+			return domain.DefaultBaseURLMiniMax
+		case PlatformAntigravity:
+			return "https://api.antigravity.so/antigravity"
+		default:
+			return "https://api.anthropic.com"
+		}
 	}
 	if a.Platform == PlatformAntigravity {
 		return strings.TrimRight(baseURL, "/") + "/antigravity"

@@ -65,6 +65,40 @@ func TestGetBaseURL(t *testing.T) {
 			},
 			expected: "",
 		},
+		{
+			name: "apikey GLM without base_url returns default",
+			account: Account{
+				Type:     AccountTypeAPIKey,
+				Platform: PlatformGLM,
+			},
+			expected: "https://open.bigmodel.cn/api/paas/v4",
+		},
+		{
+			name: "apikey MiniMax without base_url returns default",
+			account: Account{
+				Type:     AccountTypeAPIKey,
+				Platform: PlatformMiniMax,
+			},
+			expected: "https://api.minimax.io",
+		},
+		{
+			name: "apikey GLM with custom base_url",
+			account: Account{
+				Type:        AccountTypeAPIKey,
+				Platform:    PlatformGLM,
+				Credentials: map[string]any{"base_url": "https://custom-glm.example.com"},
+			},
+			expected: "https://custom-glm.example.com",
+		},
+		{
+			name: "apikey MiniMax with custom base_url",
+			account: Account{
+				Type:        AccountTypeAPIKey,
+				Platform:    PlatformMiniMax,
+				Credentials: map[string]any{"base_url": "https://custom-minimax.example.com"},
+			},
+			expected: "https://custom-minimax.example.com",
+		},
 	}
 
 	for _, tt := range tests {

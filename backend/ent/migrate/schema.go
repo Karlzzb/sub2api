@@ -410,6 +410,11 @@ var (
 		{Name: "sort_order", Type: field.TypeInt, Default: 0},
 		{Name: "allow_messages_dispatch", Type: field.TypeBool, Default: false},
 		{Name: "default_mapped_model", Type: field.TypeString, Size: 100, Default: ""},
+		{Name: "frequency_period", Type: field.TypeInt, Default: 1},
+		{Name: "max_concurrent", Type: field.TypeInt, Default: 3},
+		{Name: "enable_anti_ban", Type: field.TypeBool, Default: false},
+		{Name: "session_isolation", Type: field.TypeBool, Default: false},
+		{Name: "traffic_jitter", Type: field.TypeBool, Default: false},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -446,6 +451,11 @@ var (
 				Name:    "group_sort_order",
 				Unique:  false,
 				Columns: []*schema.Column{GroupsColumns[30]},
+			},
+			{
+				Name:    "group_frequency_period",
+				Unique:  false,
+				Columns: []*schema.Column{GroupsColumns[33]},
 			},
 		},
 	}
@@ -484,6 +494,54 @@ var (
 				Name:    "idempotencyrecord_status_locked_until",
 				Unique:  false,
 				Columns: []*schema.Column{IdempotencyRecordsColumns[6], IdempotencyRecordsColumns[10]},
+			},
+		},
+	}
+	// PackageChannelsColumns holds the columns for the "package_channels" table.
+	PackageChannelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "weight", Type: field.TypeInt, Default: 1},
+		{Name: "max_users", Type: field.TypeInt, Default: 0},
+		{Name: "is_enabled", Type: field.TypeBool, Default: true},
+		{Name: "account_id", Type: field.TypeInt64},
+		{Name: "group_id", Type: field.TypeInt64},
+	}
+	// PackageChannelsTable holds the schema information for the "package_channels" table.
+	PackageChannelsTable = &schema.Table{
+		Name:       "package_channels",
+		Columns:    PackageChannelsColumns,
+		PrimaryKey: []*schema.Column{PackageChannelsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "package_channels_accounts_package_channels",
+				Columns:    []*schema.Column{PackageChannelsColumns[6]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "package_channels_groups_package_channels",
+				Columns:    []*schema.Column{PackageChannelsColumns[7]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "packagechannel_group_id",
+				Unique:  false,
+				Columns: []*schema.Column{PackageChannelsColumns[7]},
+			},
+			{
+				Name:    "packagechannel_account_id",
+				Unique:  false,
+				Columns: []*schema.Column{PackageChannelsColumns[6]},
+			},
+			{
+				Name:    "packagechannel_is_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{PackageChannelsColumns[5]},
 			},
 		},
 	}
@@ -1129,6 +1187,7 @@ var (
 		ErrorPassthroughRulesTable,
 		GroupsTable,
 		IdempotencyRecordsTable,
+		PackageChannelsTable,
 		PromoCodesTable,
 		PromoCodeUsagesTable,
 		ProxiesTable,
@@ -1177,6 +1236,11 @@ func init() {
 	}
 	IdempotencyRecordsTable.Annotation = &entsql.Annotation{
 		Table: "idempotency_records",
+	}
+	PackageChannelsTable.ForeignKeys[0].RefTable = AccountsTable
+	PackageChannelsTable.ForeignKeys[1].RefTable = GroupsTable
+	PackageChannelsTable.Annotation = &entsql.Annotation{
+		Table: "package_channels",
 	}
 	PromoCodesTable.Annotation = &entsql.Annotation{
 		Table: "promo_codes",

@@ -79,6 +79,16 @@ const (
 	FieldAllowMessagesDispatch = "allow_messages_dispatch"
 	// FieldDefaultMappedModel holds the string denoting the default_mapped_model field in the database.
 	FieldDefaultMappedModel = "default_mapped_model"
+	// FieldFrequencyPeriod holds the string denoting the frequency_period field in the database.
+	FieldFrequencyPeriod = "frequency_period"
+	// FieldMaxConcurrent holds the string denoting the max_concurrent field in the database.
+	FieldMaxConcurrent = "max_concurrent"
+	// FieldEnableAntiBan holds the string denoting the enable_anti_ban field in the database.
+	FieldEnableAntiBan = "enable_anti_ban"
+	// FieldSessionIsolation holds the string denoting the session_isolation field in the database.
+	FieldSessionIsolation = "session_isolation"
+	// FieldTrafficJitter holds the string denoting the traffic_jitter field in the database.
+	FieldTrafficJitter = "traffic_jitter"
 	// EdgeAPIKeys holds the string denoting the api_keys edge name in mutations.
 	EdgeAPIKeys = "api_keys"
 	// EdgeRedeemCodes holds the string denoting the redeem_codes edge name in mutations.
@@ -91,6 +101,8 @@ const (
 	EdgeAccounts = "accounts"
 	// EdgeAllowedUsers holds the string denoting the allowed_users edge name in mutations.
 	EdgeAllowedUsers = "allowed_users"
+	// EdgePackageChannels holds the string denoting the package_channels edge name in mutations.
+	EdgePackageChannels = "package_channels"
 	// EdgeAccountGroups holds the string denoting the account_groups edge name in mutations.
 	EdgeAccountGroups = "account_groups"
 	// EdgeUserAllowedGroups holds the string denoting the user_allowed_groups edge name in mutations.
@@ -135,6 +147,13 @@ const (
 	// AllowedUsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	AllowedUsersInverseTable = "users"
+	// PackageChannelsTable is the table that holds the package_channels relation/edge.
+	PackageChannelsTable = "package_channels"
+	// PackageChannelsInverseTable is the table name for the PackageChannel entity.
+	// It exists in this package in order to avoid circular dependency with the "packagechannel" package.
+	PackageChannelsInverseTable = "package_channels"
+	// PackageChannelsColumn is the table column denoting the package_channels relation/edge.
+	PackageChannelsColumn = "group_id"
 	// AccountGroupsTable is the table that holds the account_groups relation/edge.
 	AccountGroupsTable = "account_groups"
 	// AccountGroupsInverseTable is the table name for the AccountGroup entity.
@@ -186,6 +205,11 @@ var Columns = []string{
 	FieldSortOrder,
 	FieldAllowMessagesDispatch,
 	FieldDefaultMappedModel,
+	FieldFrequencyPeriod,
+	FieldMaxConcurrent,
+	FieldEnableAntiBan,
+	FieldSessionIsolation,
+	FieldTrafficJitter,
 }
 
 var (
@@ -259,6 +283,16 @@ var (
 	DefaultDefaultMappedModel string
 	// DefaultMappedModelValidator is a validator for the "default_mapped_model" field. It is called by the builders before save.
 	DefaultMappedModelValidator func(string) error
+	// DefaultFrequencyPeriod holds the default value on creation for the "frequency_period" field.
+	DefaultFrequencyPeriod int
+	// DefaultMaxConcurrent holds the default value on creation for the "max_concurrent" field.
+	DefaultMaxConcurrent int
+	// DefaultEnableAntiBan holds the default value on creation for the "enable_anti_ban" field.
+	DefaultEnableAntiBan bool
+	// DefaultSessionIsolation holds the default value on creation for the "session_isolation" field.
+	DefaultSessionIsolation bool
+	// DefaultTrafficJitter holds the default value on creation for the "traffic_jitter" field.
+	DefaultTrafficJitter bool
 )
 
 // OrderOption defines the ordering options for the Group queries.
@@ -419,6 +453,31 @@ func ByDefaultMappedModel(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDefaultMappedModel, opts...).ToFunc()
 }
 
+// ByFrequencyPeriod orders the results by the frequency_period field.
+func ByFrequencyPeriod(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFrequencyPeriod, opts...).ToFunc()
+}
+
+// ByMaxConcurrent orders the results by the max_concurrent field.
+func ByMaxConcurrent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxConcurrent, opts...).ToFunc()
+}
+
+// ByEnableAntiBan orders the results by the enable_anti_ban field.
+func ByEnableAntiBan(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnableAntiBan, opts...).ToFunc()
+}
+
+// BySessionIsolation orders the results by the session_isolation field.
+func BySessionIsolation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSessionIsolation, opts...).ToFunc()
+}
+
+// ByTrafficJitter orders the results by the traffic_jitter field.
+func ByTrafficJitter(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTrafficJitter, opts...).ToFunc()
+}
+
 // ByAPIKeysCount orders the results by api_keys count.
 func ByAPIKeysCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -503,6 +562,20 @@ func ByAllowedUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByPackageChannelsCount orders the results by package_channels count.
+func ByPackageChannelsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPackageChannelsStep(), opts...)
+	}
+}
+
+// ByPackageChannels orders the results by package_channels terms.
+func ByPackageChannels(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPackageChannelsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByAccountGroupsCount orders the results by account_groups count.
 func ByAccountGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -570,6 +643,13 @@ func newAllowedUsersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AllowedUsersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, AllowedUsersTable, AllowedUsersPrimaryKey...),
+	)
+}
+func newPackageChannelsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PackageChannelsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PackageChannelsTable, PackageChannelsColumn),
 	)
 }
 func newAccountGroupsStep() *sqlgraph.Step {

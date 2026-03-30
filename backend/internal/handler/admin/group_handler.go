@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -17,9 +18,11 @@ import (
 
 // GroupHandler handles admin group management
 type GroupHandler struct {
-	adminService         service.AdminService
-	dashboardService     *service.DashboardService
-	groupCapacityService *service.GroupCapacityService
+	adminService           service.AdminService
+	dashboardService       *service.DashboardService
+	groupCapacityService   *service.GroupCapacityService
+	groupService           *service.GroupService
+	packageChannelService  *service.PackageChannelService
 }
 
 type optionalLimitField struct {
@@ -72,11 +75,13 @@ func (f optionalLimitField) ToServiceInput() *float64 {
 }
 
 // NewGroupHandler creates a new admin group handler
-func NewGroupHandler(adminService service.AdminService, dashboardService *service.DashboardService, groupCapacityService *service.GroupCapacityService) *GroupHandler {
+func NewGroupHandler(adminService service.AdminService, dashboardService *service.DashboardService, groupCapacityService *service.GroupCapacityService, groupService *service.GroupService, packageChannelService *service.PackageChannelService) *GroupHandler {
 	return &GroupHandler{
-		adminService:         adminService,
-		dashboardService:     dashboardService,
-		groupCapacityService: groupCapacityService,
+		adminService:           adminService,
+		dashboardService:       dashboardService,
+		groupCapacityService:   groupCapacityService,
+		groupService:           groupService,
+		packageChannelService:  packageChannelService,
 	}
 }
 
@@ -516,4 +521,157 @@ func (h *GroupHandler) UpdateSortOrder(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "Sort order updated successfully"})
+}
+
+// GetPackageSettings 获取套餐扩展配置
+// GET /api/v1/admin/groups/:id/package-settings
+func (h *GroupHandler) GetPackageSettings(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	settings, err := h.groupService.GetPackageSettings(c.Request.Context(), groupID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, settings)
+}
+
+// UpdatePackageSettings 更新套餐扩展配置
+// PUT /api/v1/admin/groups/:id/package-settings
+func (h *GroupHandler) UpdatePackageSettings(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	var req service.PackageSettings
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	if err := h.groupService.UpdatePackageSettings(c.Request.Context(), groupID, &req); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "package settings updated"})
+}
+
+// GetChannels 获取套餐关联的账号渠道
+// GET /api/v1/admin/groups/:id/channels
+func (h *GroupHandler) GetChannels(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	channels, err := h.packageChannelService.GetChannelsByGroup(c.Request.Context(), groupID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"channels": channels})
+}
+
+// AddChannelRequest represents the request to add a channel
+type AddChannelRequest struct {
+	AccountID int64 `json:"account_id" binding:"required"`
+	Weight    int   `json:"weight"`
+}
+
+// AddChannel 添加账号到套餐渠道
+// POST /api/v1/admin/groups/:id/channels
+func (h *GroupHandler) AddChannel(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	var req AddChannelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	weight := req.Weight
+	if weight <= 0 {
+		weight = 1
+	}
+
+	channel, err := h.packageChannelService.AssignAccountToGroup(c.Request.Context(), groupID, req.AccountID, weight)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, channel)
+}
+
+// UpdateChannelRequest represents the request to update a channel
+type UpdateChannelRequest struct {
+	Weight    int  `json:"weight"`
+	MaxUsers  int  `json:"max_users"`
+	IsEnabled bool `json:"is_enabled"`
+}
+
+// UpdateChannel 更新渠道配置
+// PUT /api/v1/admin/groups/:id/channels/:account_id
+func (h *GroupHandler) UpdateChannel(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	accountID, err := strconv.ParseInt(c.Param("account_id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid account ID")
+		return
+	}
+
+	var req UpdateChannelRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	if err := h.packageChannelService.UpdateChannel(c.Request.Context(), groupID, accountID, req.Weight, req.MaxUsers, req.IsEnabled); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "channel updated"})
+}
+
+// RemoveChannel 移除账号渠道
+// DELETE /api/v1/admin/groups/:id/channels/:account_id
+func (h *GroupHandler) RemoveChannel(c *gin.Context) {
+	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid group ID")
+		return
+	}
+
+	accountID, err := strconv.ParseInt(c.Param("account_id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid account ID")
+		return
+	}
+
+	if err := h.packageChannelService.RemoveChannel(c.Request.Context(), groupID, accountID); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{"message": "channel removed"})
 }

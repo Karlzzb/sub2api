@@ -82,6 +82,16 @@ type Group struct {
 	AllowMessagesDispatch bool `json:"allow_messages_dispatch,omitempty"`
 	// 默认映射模型 ID，当账号级映射找不到时使用此值
 	DefaultMappedModel string `json:"default_mapped_model,omitempty"`
+	// 频次限制周期（小时）
+	FrequencyPeriod int `json:"frequency_period,omitempty"`
+	// 最大并发数
+	MaxConcurrent int `json:"max_concurrent,omitempty"`
+	// 是否启用防封号策略
+	EnableAntiBan bool `json:"enable_anti_ban,omitempty"`
+	// 会话隔离开关
+	SessionIsolation bool `json:"session_isolation,omitempty"`
+	// 流量伪装开关
+	TrafficJitter bool `json:"traffic_jitter,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
 	Edges        GroupEdges `json:"edges"`
@@ -102,13 +112,15 @@ type GroupEdges struct {
 	Accounts []*Account `json:"accounts,omitempty"`
 	// AllowedUsers holds the value of the allowed_users edge.
 	AllowedUsers []*User `json:"allowed_users,omitempty"`
+	// PackageChannels holds the value of the package_channels edge.
+	PackageChannels []*PackageChannel `json:"package_channels,omitempty"`
 	// AccountGroups holds the value of the account_groups edge.
 	AccountGroups []*AccountGroup `json:"account_groups,omitempty"`
 	// UserAllowedGroups holds the value of the user_allowed_groups edge.
 	UserAllowedGroups []*UserAllowedGroup `json:"user_allowed_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [9]bool
 }
 
 // APIKeysOrErr returns the APIKeys value or an error if the edge
@@ -165,10 +177,19 @@ func (e GroupEdges) AllowedUsersOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "allowed_users"}
 }
 
+// PackageChannelsOrErr returns the PackageChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) PackageChannelsOrErr() ([]*PackageChannel, error) {
+	if e.loadedTypes[6] {
+		return e.PackageChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "package_channels"}
+}
+
 // AccountGroupsOrErr returns the AccountGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e GroupEdges) AccountGroupsOrErr() ([]*AccountGroup, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.AccountGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "account_groups"}
@@ -177,7 +198,7 @@ func (e GroupEdges) AccountGroupsOrErr() ([]*AccountGroup, error) {
 // UserAllowedGroupsOrErr returns the UserAllowedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e GroupEdges) UserAllowedGroupsOrErr() ([]*UserAllowedGroup, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.UserAllowedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "user_allowed_groups"}
@@ -190,11 +211,11 @@ func (*Group) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case group.FieldModelRouting, group.FieldSupportedModelScopes:
 			values[i] = new([]byte)
-		case group.FieldIsExclusive, group.FieldClaudeCodeOnly, group.FieldModelRoutingEnabled, group.FieldMcpXMLInject, group.FieldAllowMessagesDispatch:
+		case group.FieldIsExclusive, group.FieldClaudeCodeOnly, group.FieldModelRoutingEnabled, group.FieldMcpXMLInject, group.FieldAllowMessagesDispatch, group.FieldEnableAntiBan, group.FieldSessionIsolation, group.FieldTrafficJitter:
 			values[i] = new(sql.NullBool)
 		case group.FieldRateMultiplier, group.FieldDailyLimitUsd, group.FieldWeeklyLimitUsd, group.FieldMonthlyLimitUsd, group.FieldImagePrice1k, group.FieldImagePrice2k, group.FieldImagePrice4k, group.FieldSoraImagePrice360, group.FieldSoraImagePrice540, group.FieldSoraVideoPricePerRequest, group.FieldSoraVideoPricePerRequestHd:
 			values[i] = new(sql.NullFloat64)
-		case group.FieldID, group.FieldDefaultValidityDays, group.FieldSoraStorageQuotaBytes, group.FieldFallbackGroupID, group.FieldFallbackGroupIDOnInvalidRequest, group.FieldSortOrder:
+		case group.FieldID, group.FieldDefaultValidityDays, group.FieldSoraStorageQuotaBytes, group.FieldFallbackGroupID, group.FieldFallbackGroupIDOnInvalidRequest, group.FieldSortOrder, group.FieldFrequencyPeriod, group.FieldMaxConcurrent:
 			values[i] = new(sql.NullInt64)
 		case group.FieldName, group.FieldDescription, group.FieldStatus, group.FieldPlatform, group.FieldSubscriptionType, group.FieldDefaultMappedModel:
 			values[i] = new(sql.NullString)
@@ -431,6 +452,36 @@ func (_m *Group) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DefaultMappedModel = value.String
 			}
+		case group.FieldFrequencyPeriod:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field frequency_period", values[i])
+			} else if value.Valid {
+				_m.FrequencyPeriod = int(value.Int64)
+			}
+		case group.FieldMaxConcurrent:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field max_concurrent", values[i])
+			} else if value.Valid {
+				_m.MaxConcurrent = int(value.Int64)
+			}
+		case group.FieldEnableAntiBan:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field enable_anti_ban", values[i])
+			} else if value.Valid {
+				_m.EnableAntiBan = value.Bool
+			}
+		case group.FieldSessionIsolation:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field session_isolation", values[i])
+			} else if value.Valid {
+				_m.SessionIsolation = value.Bool
+			}
+		case group.FieldTrafficJitter:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field traffic_jitter", values[i])
+			} else if value.Valid {
+				_m.TrafficJitter = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -472,6 +523,11 @@ func (_m *Group) QueryAccounts() *AccountQuery {
 // QueryAllowedUsers queries the "allowed_users" edge of the Group entity.
 func (_m *Group) QueryAllowedUsers() *UserQuery {
 	return NewGroupClient(_m.config).QueryAllowedUsers(_m)
+}
+
+// QueryPackageChannels queries the "package_channels" edge of the Group entity.
+func (_m *Group) QueryPackageChannels() *PackageChannelQuery {
+	return NewGroupClient(_m.config).QueryPackageChannels(_m)
 }
 
 // QueryAccountGroups queries the "account_groups" edge of the Group entity.
@@ -630,6 +686,21 @@ func (_m *Group) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("default_mapped_model=")
 	builder.WriteString(_m.DefaultMappedModel)
+	builder.WriteString(", ")
+	builder.WriteString("frequency_period=")
+	builder.WriteString(fmt.Sprintf("%v", _m.FrequencyPeriod))
+	builder.WriteString(", ")
+	builder.WriteString("max_concurrent=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxConcurrent))
+	builder.WriteString(", ")
+	builder.WriteString("enable_anti_ban=")
+	builder.WriteString(fmt.Sprintf("%v", _m.EnableAntiBan))
+	builder.WriteString(", ")
+	builder.WriteString("session_isolation=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SessionIsolation))
+	builder.WriteString(", ")
+	builder.WriteString("traffic_jitter=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TrafficJitter))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/errorpassthroughrule"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
@@ -62,6 +63,8 @@ type Client struct {
 	Group *GroupClient
 	// IdempotencyRecord is the client for interacting with the IdempotencyRecord builders.
 	IdempotencyRecord *IdempotencyRecordClient
+	// PackageChannel is the client for interacting with the PackageChannel builders.
+	PackageChannel *PackageChannelClient
 	// PromoCode is the client for interacting with the PromoCode builders.
 	PromoCode *PromoCodeClient
 	// PromoCodeUsage is the client for interacting with the PromoCodeUsage builders.
@@ -109,6 +112,7 @@ func (c *Client) init() {
 	c.ErrorPassthroughRule = NewErrorPassthroughRuleClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.IdempotencyRecord = NewIdempotencyRecordClient(c.config)
+	c.PackageChannel = NewPackageChannelClient(c.config)
 	c.PromoCode = NewPromoCodeClient(c.config)
 	c.PromoCodeUsage = NewPromoCodeUsageClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
@@ -223,6 +227,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ErrorPassthroughRule:    NewErrorPassthroughRuleClient(cfg),
 		Group:                   NewGroupClient(cfg),
 		IdempotencyRecord:       NewIdempotencyRecordClient(cfg),
+		PackageChannel:          NewPackageChannelClient(cfg),
 		PromoCode:               NewPromoCodeClient(cfg),
 		PromoCodeUsage:          NewPromoCodeUsageClient(cfg),
 		Proxy:                   NewProxyClient(cfg),
@@ -264,6 +269,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ErrorPassthroughRule:    NewErrorPassthroughRuleClient(cfg),
 		Group:                   NewGroupClient(cfg),
 		IdempotencyRecord:       NewIdempotencyRecordClient(cfg),
+		PackageChannel:          NewPackageChannelClient(cfg),
 		PromoCode:               NewPromoCodeClient(cfg),
 		PromoCodeUsage:          NewPromoCodeUsageClient(cfg),
 		Proxy:                   NewProxyClient(cfg),
@@ -308,9 +314,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Account, c.AccountGroup, c.Announcement, c.AnnouncementRead,
-		c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord, c.PromoCode,
-		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
+		c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord, c.PackageChannel,
+		c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret,
+		c.Setting, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
 		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserSubscription,
 	} {
@@ -323,9 +329,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Account, c.AccountGroup, c.Announcement, c.AnnouncementRead,
-		c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord, c.PromoCode,
-		c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret, c.Setting,
-		c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
+		c.ErrorPassthroughRule, c.Group, c.IdempotencyRecord, c.PackageChannel,
+		c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.SecuritySecret,
+		c.Setting, c.TLSFingerprintProfile, c.UsageCleanupTask, c.UsageLog, c.User,
 		c.UserAllowedGroup, c.UserAttributeDefinition, c.UserAttributeValue,
 		c.UserSubscription,
 	} {
@@ -352,6 +358,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Group.mutate(ctx, m)
 	case *IdempotencyRecordMutation:
 		return c.IdempotencyRecord.mutate(ctx, m)
+	case *PackageChannelMutation:
+		return c.PackageChannel.mutate(ctx, m)
 	case *PromoCodeMutation:
 		return c.PromoCode.mutate(ctx, m)
 	case *PromoCodeUsageMutation:
@@ -685,6 +693,22 @@ func (c *AccountClient) QueryGroups(_m *Account) *GroupQuery {
 			sqlgraph.From(account.Table, account.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, account.GroupsTable, account.GroupsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPackageChannels queries the package_channels edge of a Account.
+func (c *AccountClient) QueryPackageChannels(_m *Account) *PackageChannelQuery {
+	query := (&PackageChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(packagechannel.Table, packagechannel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.PackageChannelsTable, account.PackageChannelsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1534,6 +1558,22 @@ func (c *GroupClient) QueryAllowedUsers(_m *Group) *UserQuery {
 	return query
 }
 
+// QueryPackageChannels queries the package_channels edge of a Group.
+func (c *GroupClient) QueryPackageChannels(_m *Group) *PackageChannelQuery {
+	query := (&PackageChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(packagechannel.Table, packagechannel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.PackageChannelsTable, group.PackageChannelsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryAccountGroups queries the account_groups edge of a Group.
 func (c *GroupClient) QueryAccountGroups(_m *Group) *AccountGroupQuery {
 	query := (&AccountGroupClient{config: c.config}).Query()
@@ -1723,6 +1763,171 @@ func (c *IdempotencyRecordClient) mutate(ctx context.Context, m *IdempotencyReco
 		return (&IdempotencyRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown IdempotencyRecord mutation op: %q", m.Op())
+	}
+}
+
+// PackageChannelClient is a client for the PackageChannel schema.
+type PackageChannelClient struct {
+	config
+}
+
+// NewPackageChannelClient returns a client for the PackageChannel from the given config.
+func NewPackageChannelClient(c config) *PackageChannelClient {
+	return &PackageChannelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `packagechannel.Hooks(f(g(h())))`.
+func (c *PackageChannelClient) Use(hooks ...Hook) {
+	c.hooks.PackageChannel = append(c.hooks.PackageChannel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `packagechannel.Intercept(f(g(h())))`.
+func (c *PackageChannelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PackageChannel = append(c.inters.PackageChannel, interceptors...)
+}
+
+// Create returns a builder for creating a PackageChannel entity.
+func (c *PackageChannelClient) Create() *PackageChannelCreate {
+	mutation := newPackageChannelMutation(c.config, OpCreate)
+	return &PackageChannelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PackageChannel entities.
+func (c *PackageChannelClient) CreateBulk(builders ...*PackageChannelCreate) *PackageChannelCreateBulk {
+	return &PackageChannelCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PackageChannelClient) MapCreateBulk(slice any, setFunc func(*PackageChannelCreate, int)) *PackageChannelCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PackageChannelCreateBulk{err: fmt.Errorf("calling to PackageChannelClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PackageChannelCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PackageChannelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PackageChannel.
+func (c *PackageChannelClient) Update() *PackageChannelUpdate {
+	mutation := newPackageChannelMutation(c.config, OpUpdate)
+	return &PackageChannelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PackageChannelClient) UpdateOne(_m *PackageChannel) *PackageChannelUpdateOne {
+	mutation := newPackageChannelMutation(c.config, OpUpdateOne, withPackageChannel(_m))
+	return &PackageChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PackageChannelClient) UpdateOneID(id int64) *PackageChannelUpdateOne {
+	mutation := newPackageChannelMutation(c.config, OpUpdateOne, withPackageChannelID(id))
+	return &PackageChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PackageChannel.
+func (c *PackageChannelClient) Delete() *PackageChannelDelete {
+	mutation := newPackageChannelMutation(c.config, OpDelete)
+	return &PackageChannelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PackageChannelClient) DeleteOne(_m *PackageChannel) *PackageChannelDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PackageChannelClient) DeleteOneID(id int64) *PackageChannelDeleteOne {
+	builder := c.Delete().Where(packagechannel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PackageChannelDeleteOne{builder}
+}
+
+// Query returns a query builder for PackageChannel.
+func (c *PackageChannelClient) Query() *PackageChannelQuery {
+	return &PackageChannelQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePackageChannel},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PackageChannel entity by its id.
+func (c *PackageChannelClient) Get(ctx context.Context, id int64) (*PackageChannel, error) {
+	return c.Query().Where(packagechannel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PackageChannelClient) GetX(ctx context.Context, id int64) *PackageChannel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryGroup queries the group edge of a PackageChannel.
+func (c *PackageChannelClient) QueryGroup(_m *PackageChannel) *GroupQuery {
+	query := (&GroupClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagechannel.Table, packagechannel.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, packagechannel.GroupTable, packagechannel.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAccount queries the account edge of a PackageChannel.
+func (c *PackageChannelClient) QueryAccount(_m *PackageChannel) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(packagechannel.Table, packagechannel.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, packagechannel.AccountTable, packagechannel.AccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PackageChannelClient) Hooks() []Hook {
+	return c.hooks.PackageChannel
+}
+
+// Interceptors returns the client interceptors.
+func (c *PackageChannelClient) Interceptors() []Interceptor {
+	return c.inters.PackageChannel
+}
+
+func (c *PackageChannelClient) mutate(ctx context.Context, m *PackageChannelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PackageChannelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PackageChannelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PackageChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PackageChannelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PackageChannel mutation op: %q", m.Op())
 	}
 }
 
@@ -4031,17 +4236,17 @@ func (c *UserSubscriptionClient) mutate(ctx context.Context, m *UserSubscription
 type (
 	hooks struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead,
-		ErrorPassthroughRule, Group, IdempotencyRecord, PromoCode, PromoCodeUsage,
-		Proxy, RedeemCode, SecuritySecret, Setting, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserSubscription []ent.Hook
+		ErrorPassthroughRule, Group, IdempotencyRecord, PackageChannel, PromoCode,
+		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting,
+		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
+		UserAttributeDefinition, UserAttributeValue, UserSubscription []ent.Hook
 	}
 	inters struct {
 		APIKey, Account, AccountGroup, Announcement, AnnouncementRead,
-		ErrorPassthroughRule, Group, IdempotencyRecord, PromoCode, PromoCodeUsage,
-		Proxy, RedeemCode, SecuritySecret, Setting, TLSFingerprintProfile,
-		UsageCleanupTask, UsageLog, User, UserAllowedGroup, UserAttributeDefinition,
-		UserAttributeValue, UserSubscription []ent.Interceptor
+		ErrorPassthroughRule, Group, IdempotencyRecord, PackageChannel, PromoCode,
+		PromoCodeUsage, Proxy, RedeemCode, SecuritySecret, Setting,
+		TLSFingerprintProfile, UsageCleanupTask, UsageLog, User, UserAllowedGroup,
+		UserAttributeDefinition, UserAttributeValue, UserSubscription []ent.Interceptor
 	}
 )
 

@@ -15,6 +15,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
@@ -653,6 +654,90 @@ func (_u *GroupUpdate) SetNillableDefaultMappedModel(v *string) *GroupUpdate {
 	return _u
 }
 
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (_u *GroupUpdate) SetFrequencyPeriod(v int) *GroupUpdate {
+	_u.mutation.ResetFrequencyPeriod()
+	_u.mutation.SetFrequencyPeriod(v)
+	return _u
+}
+
+// SetNillableFrequencyPeriod sets the "frequency_period" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableFrequencyPeriod(v *int) *GroupUpdate {
+	if v != nil {
+		_u.SetFrequencyPeriod(*v)
+	}
+	return _u
+}
+
+// AddFrequencyPeriod adds value to the "frequency_period" field.
+func (_u *GroupUpdate) AddFrequencyPeriod(v int) *GroupUpdate {
+	_u.mutation.AddFrequencyPeriod(v)
+	return _u
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (_u *GroupUpdate) SetMaxConcurrent(v int) *GroupUpdate {
+	_u.mutation.ResetMaxConcurrent()
+	_u.mutation.SetMaxConcurrent(v)
+	return _u
+}
+
+// SetNillableMaxConcurrent sets the "max_concurrent" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableMaxConcurrent(v *int) *GroupUpdate {
+	if v != nil {
+		_u.SetMaxConcurrent(*v)
+	}
+	return _u
+}
+
+// AddMaxConcurrent adds value to the "max_concurrent" field.
+func (_u *GroupUpdate) AddMaxConcurrent(v int) *GroupUpdate {
+	_u.mutation.AddMaxConcurrent(v)
+	return _u
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (_u *GroupUpdate) SetEnableAntiBan(v bool) *GroupUpdate {
+	_u.mutation.SetEnableAntiBan(v)
+	return _u
+}
+
+// SetNillableEnableAntiBan sets the "enable_anti_ban" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableEnableAntiBan(v *bool) *GroupUpdate {
+	if v != nil {
+		_u.SetEnableAntiBan(*v)
+	}
+	return _u
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (_u *GroupUpdate) SetSessionIsolation(v bool) *GroupUpdate {
+	_u.mutation.SetSessionIsolation(v)
+	return _u
+}
+
+// SetNillableSessionIsolation sets the "session_isolation" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableSessionIsolation(v *bool) *GroupUpdate {
+	if v != nil {
+		_u.SetSessionIsolation(*v)
+	}
+	return _u
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (_u *GroupUpdate) SetTrafficJitter(v bool) *GroupUpdate {
+	_u.mutation.SetTrafficJitter(v)
+	return _u
+}
+
+// SetNillableTrafficJitter sets the "traffic_jitter" field if the given value is not nil.
+func (_u *GroupUpdate) SetNillableTrafficJitter(v *bool) *GroupUpdate {
+	if v != nil {
+		_u.SetTrafficJitter(*v)
+	}
+	return _u
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *GroupUpdate) AddAPIKeyIDs(ids ...int64) *GroupUpdate {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -741,6 +826,21 @@ func (_u *GroupUpdate) AddAllowedUsers(v ...*User) *GroupUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddAllowedUserIDs(ids...)
+}
+
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by IDs.
+func (_u *GroupUpdate) AddPackageChannelIDs(ids ...int64) *GroupUpdate {
+	_u.mutation.AddPackageChannelIDs(ids...)
+	return _u
+}
+
+// AddPackageChannels adds the "package_channels" edges to the PackageChannel entity.
+func (_u *GroupUpdate) AddPackageChannels(v ...*PackageChannel) *GroupUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPackageChannelIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -872,6 +972,27 @@ func (_u *GroupUpdate) RemoveAllowedUsers(v ...*User) *GroupUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAllowedUserIDs(ids...)
+}
+
+// ClearPackageChannels clears all "package_channels" edges to the PackageChannel entity.
+func (_u *GroupUpdate) ClearPackageChannels() *GroupUpdate {
+	_u.mutation.ClearPackageChannels()
+	return _u
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to PackageChannel entities by IDs.
+func (_u *GroupUpdate) RemovePackageChannelIDs(ids ...int64) *GroupUpdate {
+	_u.mutation.RemovePackageChannelIDs(ids...)
+	return _u
+}
+
+// RemovePackageChannels removes "package_channels" edges to PackageChannel entities.
+func (_u *GroupUpdate) RemovePackageChannels(v ...*PackageChannel) *GroupUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePackageChannelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1148,6 +1269,27 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.DefaultMappedModel(); ok {
 		_spec.SetField(group.FieldDefaultMappedModel, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.FrequencyPeriod(); ok {
+		_spec.SetField(group.FieldFrequencyPeriod, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFrequencyPeriod(); ok {
+		_spec.AddField(group.FieldFrequencyPeriod, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MaxConcurrent(); ok {
+		_spec.SetField(group.FieldMaxConcurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxConcurrent(); ok {
+		_spec.AddField(group.FieldMaxConcurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.EnableAntiBan(); ok {
+		_spec.SetField(group.FieldEnableAntiBan, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SessionIsolation(); ok {
+		_spec.SetField(group.FieldSessionIsolation, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.TrafficJitter(); ok {
+		_spec.SetField(group.FieldTrafficJitter, field.TypeBool, value)
 	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1441,6 +1583,51 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPackageChannelsIDs(); len(nodes) > 0 && !_u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PackageChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -2081,6 +2268,90 @@ func (_u *GroupUpdateOne) SetNillableDefaultMappedModel(v *string) *GroupUpdateO
 	return _u
 }
 
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (_u *GroupUpdateOne) SetFrequencyPeriod(v int) *GroupUpdateOne {
+	_u.mutation.ResetFrequencyPeriod()
+	_u.mutation.SetFrequencyPeriod(v)
+	return _u
+}
+
+// SetNillableFrequencyPeriod sets the "frequency_period" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableFrequencyPeriod(v *int) *GroupUpdateOne {
+	if v != nil {
+		_u.SetFrequencyPeriod(*v)
+	}
+	return _u
+}
+
+// AddFrequencyPeriod adds value to the "frequency_period" field.
+func (_u *GroupUpdateOne) AddFrequencyPeriod(v int) *GroupUpdateOne {
+	_u.mutation.AddFrequencyPeriod(v)
+	return _u
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (_u *GroupUpdateOne) SetMaxConcurrent(v int) *GroupUpdateOne {
+	_u.mutation.ResetMaxConcurrent()
+	_u.mutation.SetMaxConcurrent(v)
+	return _u
+}
+
+// SetNillableMaxConcurrent sets the "max_concurrent" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableMaxConcurrent(v *int) *GroupUpdateOne {
+	if v != nil {
+		_u.SetMaxConcurrent(*v)
+	}
+	return _u
+}
+
+// AddMaxConcurrent adds value to the "max_concurrent" field.
+func (_u *GroupUpdateOne) AddMaxConcurrent(v int) *GroupUpdateOne {
+	_u.mutation.AddMaxConcurrent(v)
+	return _u
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (_u *GroupUpdateOne) SetEnableAntiBan(v bool) *GroupUpdateOne {
+	_u.mutation.SetEnableAntiBan(v)
+	return _u
+}
+
+// SetNillableEnableAntiBan sets the "enable_anti_ban" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableEnableAntiBan(v *bool) *GroupUpdateOne {
+	if v != nil {
+		_u.SetEnableAntiBan(*v)
+	}
+	return _u
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (_u *GroupUpdateOne) SetSessionIsolation(v bool) *GroupUpdateOne {
+	_u.mutation.SetSessionIsolation(v)
+	return _u
+}
+
+// SetNillableSessionIsolation sets the "session_isolation" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableSessionIsolation(v *bool) *GroupUpdateOne {
+	if v != nil {
+		_u.SetSessionIsolation(*v)
+	}
+	return _u
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (_u *GroupUpdateOne) SetTrafficJitter(v bool) *GroupUpdateOne {
+	_u.mutation.SetTrafficJitter(v)
+	return _u
+}
+
+// SetNillableTrafficJitter sets the "traffic_jitter" field if the given value is not nil.
+func (_u *GroupUpdateOne) SetNillableTrafficJitter(v *bool) *GroupUpdateOne {
+	if v != nil {
+		_u.SetTrafficJitter(*v)
+	}
+	return _u
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_u *GroupUpdateOne) AddAPIKeyIDs(ids ...int64) *GroupUpdateOne {
 	_u.mutation.AddAPIKeyIDs(ids...)
@@ -2169,6 +2440,21 @@ func (_u *GroupUpdateOne) AddAllowedUsers(v ...*User) *GroupUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddAllowedUserIDs(ids...)
+}
+
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by IDs.
+func (_u *GroupUpdateOne) AddPackageChannelIDs(ids ...int64) *GroupUpdateOne {
+	_u.mutation.AddPackageChannelIDs(ids...)
+	return _u
+}
+
+// AddPackageChannels adds the "package_channels" edges to the PackageChannel entity.
+func (_u *GroupUpdateOne) AddPackageChannels(v ...*PackageChannel) *GroupUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPackageChannelIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -2300,6 +2586,27 @@ func (_u *GroupUpdateOne) RemoveAllowedUsers(v ...*User) *GroupUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAllowedUserIDs(ids...)
+}
+
+// ClearPackageChannels clears all "package_channels" edges to the PackageChannel entity.
+func (_u *GroupUpdateOne) ClearPackageChannels() *GroupUpdateOne {
+	_u.mutation.ClearPackageChannels()
+	return _u
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to PackageChannel entities by IDs.
+func (_u *GroupUpdateOne) RemovePackageChannelIDs(ids ...int64) *GroupUpdateOne {
+	_u.mutation.RemovePackageChannelIDs(ids...)
+	return _u
+}
+
+// RemovePackageChannels removes "package_channels" edges to PackageChannel entities.
+func (_u *GroupUpdateOne) RemovePackageChannels(v ...*PackageChannel) *GroupUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePackageChannelIDs(ids...)
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
@@ -2607,6 +2914,27 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 	if value, ok := _u.mutation.DefaultMappedModel(); ok {
 		_spec.SetField(group.FieldDefaultMappedModel, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.FrequencyPeriod(); ok {
+		_spec.SetField(group.FieldFrequencyPeriod, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedFrequencyPeriod(); ok {
+		_spec.AddField(group.FieldFrequencyPeriod, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MaxConcurrent(); ok {
+		_spec.SetField(group.FieldMaxConcurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxConcurrent(); ok {
+		_spec.AddField(group.FieldMaxConcurrent, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.EnableAntiBan(); ok {
+		_spec.SetField(group.FieldEnableAntiBan, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SessionIsolation(); ok {
+		_spec.SetField(group.FieldSessionIsolation, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.TrafficJitter(); ok {
+		_spec.SetField(group.FieldTrafficJitter, field.TypeBool, value)
+	}
 	if _u.mutation.APIKeysCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -2899,6 +3227,51 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPackageChannelsIDs(); len(nodes) > 0 && !_u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PackageChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Group{config: _u.config}

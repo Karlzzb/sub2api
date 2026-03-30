@@ -205,6 +205,31 @@ func DefaultMappedModel(v string) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldDefaultMappedModel, v))
 }
 
+// FrequencyPeriod applies equality check predicate on the "frequency_period" field. It's identical to FrequencyPeriodEQ.
+func FrequencyPeriod(v int) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldFrequencyPeriod, v))
+}
+
+// MaxConcurrent applies equality check predicate on the "max_concurrent" field. It's identical to MaxConcurrentEQ.
+func MaxConcurrent(v int) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldMaxConcurrent, v))
+}
+
+// EnableAntiBan applies equality check predicate on the "enable_anti_ban" field. It's identical to EnableAntiBanEQ.
+func EnableAntiBan(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldEnableAntiBan, v))
+}
+
+// SessionIsolation applies equality check predicate on the "session_isolation" field. It's identical to SessionIsolationEQ.
+func SessionIsolation(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldSessionIsolation, v))
+}
+
+// TrafficJitter applies equality check predicate on the "traffic_jitter" field. It's identical to TrafficJitterEQ.
+func TrafficJitter(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldTrafficJitter, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldCreatedAt, v))
@@ -1555,6 +1580,116 @@ func DefaultMappedModelContainsFold(v string) predicate.Group {
 	return predicate.Group(sql.FieldContainsFold(FieldDefaultMappedModel, v))
 }
 
+// FrequencyPeriodEQ applies the EQ predicate on the "frequency_period" field.
+func FrequencyPeriodEQ(v int) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldFrequencyPeriod, v))
+}
+
+// FrequencyPeriodNEQ applies the NEQ predicate on the "frequency_period" field.
+func FrequencyPeriodNEQ(v int) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldFrequencyPeriod, v))
+}
+
+// FrequencyPeriodIn applies the In predicate on the "frequency_period" field.
+func FrequencyPeriodIn(vs ...int) predicate.Group {
+	return predicate.Group(sql.FieldIn(FieldFrequencyPeriod, vs...))
+}
+
+// FrequencyPeriodNotIn applies the NotIn predicate on the "frequency_period" field.
+func FrequencyPeriodNotIn(vs ...int) predicate.Group {
+	return predicate.Group(sql.FieldNotIn(FieldFrequencyPeriod, vs...))
+}
+
+// FrequencyPeriodGT applies the GT predicate on the "frequency_period" field.
+func FrequencyPeriodGT(v int) predicate.Group {
+	return predicate.Group(sql.FieldGT(FieldFrequencyPeriod, v))
+}
+
+// FrequencyPeriodGTE applies the GTE predicate on the "frequency_period" field.
+func FrequencyPeriodGTE(v int) predicate.Group {
+	return predicate.Group(sql.FieldGTE(FieldFrequencyPeriod, v))
+}
+
+// FrequencyPeriodLT applies the LT predicate on the "frequency_period" field.
+func FrequencyPeriodLT(v int) predicate.Group {
+	return predicate.Group(sql.FieldLT(FieldFrequencyPeriod, v))
+}
+
+// FrequencyPeriodLTE applies the LTE predicate on the "frequency_period" field.
+func FrequencyPeriodLTE(v int) predicate.Group {
+	return predicate.Group(sql.FieldLTE(FieldFrequencyPeriod, v))
+}
+
+// MaxConcurrentEQ applies the EQ predicate on the "max_concurrent" field.
+func MaxConcurrentEQ(v int) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldMaxConcurrent, v))
+}
+
+// MaxConcurrentNEQ applies the NEQ predicate on the "max_concurrent" field.
+func MaxConcurrentNEQ(v int) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldMaxConcurrent, v))
+}
+
+// MaxConcurrentIn applies the In predicate on the "max_concurrent" field.
+func MaxConcurrentIn(vs ...int) predicate.Group {
+	return predicate.Group(sql.FieldIn(FieldMaxConcurrent, vs...))
+}
+
+// MaxConcurrentNotIn applies the NotIn predicate on the "max_concurrent" field.
+func MaxConcurrentNotIn(vs ...int) predicate.Group {
+	return predicate.Group(sql.FieldNotIn(FieldMaxConcurrent, vs...))
+}
+
+// MaxConcurrentGT applies the GT predicate on the "max_concurrent" field.
+func MaxConcurrentGT(v int) predicate.Group {
+	return predicate.Group(sql.FieldGT(FieldMaxConcurrent, v))
+}
+
+// MaxConcurrentGTE applies the GTE predicate on the "max_concurrent" field.
+func MaxConcurrentGTE(v int) predicate.Group {
+	return predicate.Group(sql.FieldGTE(FieldMaxConcurrent, v))
+}
+
+// MaxConcurrentLT applies the LT predicate on the "max_concurrent" field.
+func MaxConcurrentLT(v int) predicate.Group {
+	return predicate.Group(sql.FieldLT(FieldMaxConcurrent, v))
+}
+
+// MaxConcurrentLTE applies the LTE predicate on the "max_concurrent" field.
+func MaxConcurrentLTE(v int) predicate.Group {
+	return predicate.Group(sql.FieldLTE(FieldMaxConcurrent, v))
+}
+
+// EnableAntiBanEQ applies the EQ predicate on the "enable_anti_ban" field.
+func EnableAntiBanEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldEnableAntiBan, v))
+}
+
+// EnableAntiBanNEQ applies the NEQ predicate on the "enable_anti_ban" field.
+func EnableAntiBanNEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldEnableAntiBan, v))
+}
+
+// SessionIsolationEQ applies the EQ predicate on the "session_isolation" field.
+func SessionIsolationEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldSessionIsolation, v))
+}
+
+// SessionIsolationNEQ applies the NEQ predicate on the "session_isolation" field.
+func SessionIsolationNEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldSessionIsolation, v))
+}
+
+// TrafficJitterEQ applies the EQ predicate on the "traffic_jitter" field.
+func TrafficJitterEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldTrafficJitter, v))
+}
+
+// TrafficJitterNEQ applies the NEQ predicate on the "traffic_jitter" field.
+func TrafficJitterNEQ(v bool) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldTrafficJitter, v))
+}
+
 // HasAPIKeys applies the HasEdge predicate on the "api_keys" edge.
 func HasAPIKeys() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -1685,6 +1820,29 @@ func HasAllowedUsers() predicate.Group {
 func HasAllowedUsersWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := newAllowedUsersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPackageChannels applies the HasEdge predicate on the "package_channels" edge.
+func HasPackageChannels() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PackageChannelsTable, PackageChannelsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPackageChannelsWith applies the HasEdge predicate on the "package_channels" edge with a given conditions (other predicates).
+func HasPackageChannelsWith(preds ...predicate.PackageChannel) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := newPackageChannelsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

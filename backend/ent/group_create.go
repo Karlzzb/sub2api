@@ -14,6 +14,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
 	"github.com/Wei-Shaw/sub2api/ent/user"
@@ -452,6 +453,76 @@ func (_c *GroupCreate) SetNillableDefaultMappedModel(v *string) *GroupCreate {
 	return _c
 }
 
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (_c *GroupCreate) SetFrequencyPeriod(v int) *GroupCreate {
+	_c.mutation.SetFrequencyPeriod(v)
+	return _c
+}
+
+// SetNillableFrequencyPeriod sets the "frequency_period" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableFrequencyPeriod(v *int) *GroupCreate {
+	if v != nil {
+		_c.SetFrequencyPeriod(*v)
+	}
+	return _c
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (_c *GroupCreate) SetMaxConcurrent(v int) *GroupCreate {
+	_c.mutation.SetMaxConcurrent(v)
+	return _c
+}
+
+// SetNillableMaxConcurrent sets the "max_concurrent" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableMaxConcurrent(v *int) *GroupCreate {
+	if v != nil {
+		_c.SetMaxConcurrent(*v)
+	}
+	return _c
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (_c *GroupCreate) SetEnableAntiBan(v bool) *GroupCreate {
+	_c.mutation.SetEnableAntiBan(v)
+	return _c
+}
+
+// SetNillableEnableAntiBan sets the "enable_anti_ban" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableEnableAntiBan(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetEnableAntiBan(*v)
+	}
+	return _c
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (_c *GroupCreate) SetSessionIsolation(v bool) *GroupCreate {
+	_c.mutation.SetSessionIsolation(v)
+	return _c
+}
+
+// SetNillableSessionIsolation sets the "session_isolation" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableSessionIsolation(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetSessionIsolation(*v)
+	}
+	return _c
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (_c *GroupCreate) SetTrafficJitter(v bool) *GroupCreate {
+	_c.mutation.SetTrafficJitter(v)
+	return _c
+}
+
+// SetNillableTrafficJitter sets the "traffic_jitter" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableTrafficJitter(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetTrafficJitter(*v)
+	}
+	return _c
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by IDs.
 func (_c *GroupCreate) AddAPIKeyIDs(ids ...int64) *GroupCreate {
 	_c.mutation.AddAPIKeyIDs(ids...)
@@ -540,6 +611,21 @@ func (_c *GroupCreate) AddAllowedUsers(v ...*User) *GroupCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAllowedUserIDs(ids...)
+}
+
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by IDs.
+func (_c *GroupCreate) AddPackageChannelIDs(ids ...int64) *GroupCreate {
+	_c.mutation.AddPackageChannelIDs(ids...)
+	return _c
+}
+
+// AddPackageChannels adds the "package_channels" edges to the PackageChannel entity.
+func (_c *GroupCreate) AddPackageChannels(v ...*PackageChannel) *GroupCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPackageChannelIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -649,6 +735,26 @@ func (_c *GroupCreate) defaults() error {
 		v := group.DefaultDefaultMappedModel
 		_c.mutation.SetDefaultMappedModel(v)
 	}
+	if _, ok := _c.mutation.FrequencyPeriod(); !ok {
+		v := group.DefaultFrequencyPeriod
+		_c.mutation.SetFrequencyPeriod(v)
+	}
+	if _, ok := _c.mutation.MaxConcurrent(); !ok {
+		v := group.DefaultMaxConcurrent
+		_c.mutation.SetMaxConcurrent(v)
+	}
+	if _, ok := _c.mutation.EnableAntiBan(); !ok {
+		v := group.DefaultEnableAntiBan
+		_c.mutation.SetEnableAntiBan(v)
+	}
+	if _, ok := _c.mutation.SessionIsolation(); !ok {
+		v := group.DefaultSessionIsolation
+		_c.mutation.SetSessionIsolation(v)
+	}
+	if _, ok := _c.mutation.TrafficJitter(); !ok {
+		v := group.DefaultTrafficJitter
+		_c.mutation.SetTrafficJitter(v)
+	}
 	return nil
 }
 
@@ -729,6 +835,21 @@ func (_c *GroupCreate) check() error {
 		if err := group.DefaultMappedModelValidator(v); err != nil {
 			return &ValidationError{Name: "default_mapped_model", err: fmt.Errorf(`ent: validator failed for field "Group.default_mapped_model": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.FrequencyPeriod(); !ok {
+		return &ValidationError{Name: "frequency_period", err: errors.New(`ent: missing required field "Group.frequency_period"`)}
+	}
+	if _, ok := _c.mutation.MaxConcurrent(); !ok {
+		return &ValidationError{Name: "max_concurrent", err: errors.New(`ent: missing required field "Group.max_concurrent"`)}
+	}
+	if _, ok := _c.mutation.EnableAntiBan(); !ok {
+		return &ValidationError{Name: "enable_anti_ban", err: errors.New(`ent: missing required field "Group.enable_anti_ban"`)}
+	}
+	if _, ok := _c.mutation.SessionIsolation(); !ok {
+		return &ValidationError{Name: "session_isolation", err: errors.New(`ent: missing required field "Group.session_isolation"`)}
+	}
+	if _, ok := _c.mutation.TrafficJitter(); !ok {
+		return &ValidationError{Name: "traffic_jitter", err: errors.New(`ent: missing required field "Group.traffic_jitter"`)}
 	}
 	return nil
 }
@@ -885,6 +1006,26 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec.SetField(group.FieldDefaultMappedModel, field.TypeString, value)
 		_node.DefaultMappedModel = value
 	}
+	if value, ok := _c.mutation.FrequencyPeriod(); ok {
+		_spec.SetField(group.FieldFrequencyPeriod, field.TypeInt, value)
+		_node.FrequencyPeriod = value
+	}
+	if value, ok := _c.mutation.MaxConcurrent(); ok {
+		_spec.SetField(group.FieldMaxConcurrent, field.TypeInt, value)
+		_node.MaxConcurrent = value
+	}
+	if value, ok := _c.mutation.EnableAntiBan(); ok {
+		_spec.SetField(group.FieldEnableAntiBan, field.TypeBool, value)
+		_node.EnableAntiBan = value
+	}
+	if value, ok := _c.mutation.SessionIsolation(); ok {
+		_spec.SetField(group.FieldSessionIsolation, field.TypeBool, value)
+		_node.SessionIsolation = value
+	}
+	if value, ok := _c.mutation.TrafficJitter(); ok {
+		_spec.SetField(group.FieldTrafficJitter, field.TypeBool, value)
+		_node.TrafficJitter = value
+	}
 	if nodes := _c.mutation.APIKeysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -987,6 +1128,22 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.PackageChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.PackageChannelsTable,
+			Columns: []string{group.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -1596,6 +1753,78 @@ func (u *GroupUpsert) SetDefaultMappedModel(v string) *GroupUpsert {
 // UpdateDefaultMappedModel sets the "default_mapped_model" field to the value that was provided on create.
 func (u *GroupUpsert) UpdateDefaultMappedModel() *GroupUpsert {
 	u.SetExcluded(group.FieldDefaultMappedModel)
+	return u
+}
+
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (u *GroupUpsert) SetFrequencyPeriod(v int) *GroupUpsert {
+	u.Set(group.FieldFrequencyPeriod, v)
+	return u
+}
+
+// UpdateFrequencyPeriod sets the "frequency_period" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateFrequencyPeriod() *GroupUpsert {
+	u.SetExcluded(group.FieldFrequencyPeriod)
+	return u
+}
+
+// AddFrequencyPeriod adds v to the "frequency_period" field.
+func (u *GroupUpsert) AddFrequencyPeriod(v int) *GroupUpsert {
+	u.Add(group.FieldFrequencyPeriod, v)
+	return u
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (u *GroupUpsert) SetMaxConcurrent(v int) *GroupUpsert {
+	u.Set(group.FieldMaxConcurrent, v)
+	return u
+}
+
+// UpdateMaxConcurrent sets the "max_concurrent" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateMaxConcurrent() *GroupUpsert {
+	u.SetExcluded(group.FieldMaxConcurrent)
+	return u
+}
+
+// AddMaxConcurrent adds v to the "max_concurrent" field.
+func (u *GroupUpsert) AddMaxConcurrent(v int) *GroupUpsert {
+	u.Add(group.FieldMaxConcurrent, v)
+	return u
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (u *GroupUpsert) SetEnableAntiBan(v bool) *GroupUpsert {
+	u.Set(group.FieldEnableAntiBan, v)
+	return u
+}
+
+// UpdateEnableAntiBan sets the "enable_anti_ban" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateEnableAntiBan() *GroupUpsert {
+	u.SetExcluded(group.FieldEnableAntiBan)
+	return u
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (u *GroupUpsert) SetSessionIsolation(v bool) *GroupUpsert {
+	u.Set(group.FieldSessionIsolation, v)
+	return u
+}
+
+// UpdateSessionIsolation sets the "session_isolation" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateSessionIsolation() *GroupUpsert {
+	u.SetExcluded(group.FieldSessionIsolation)
+	return u
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (u *GroupUpsert) SetTrafficJitter(v bool) *GroupUpsert {
+	u.Set(group.FieldTrafficJitter, v)
+	return u
+}
+
+// UpdateTrafficJitter sets the "traffic_jitter" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateTrafficJitter() *GroupUpsert {
+	u.SetExcluded(group.FieldTrafficJitter)
 	return u
 }
 
@@ -2292,6 +2521,90 @@ func (u *GroupUpsertOne) SetDefaultMappedModel(v string) *GroupUpsertOne {
 func (u *GroupUpsertOne) UpdateDefaultMappedModel() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateDefaultMappedModel()
+	})
+}
+
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (u *GroupUpsertOne) SetFrequencyPeriod(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetFrequencyPeriod(v)
+	})
+}
+
+// AddFrequencyPeriod adds v to the "frequency_period" field.
+func (u *GroupUpsertOne) AddFrequencyPeriod(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddFrequencyPeriod(v)
+	})
+}
+
+// UpdateFrequencyPeriod sets the "frequency_period" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateFrequencyPeriod() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateFrequencyPeriod()
+	})
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (u *GroupUpsertOne) SetMaxConcurrent(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetMaxConcurrent(v)
+	})
+}
+
+// AddMaxConcurrent adds v to the "max_concurrent" field.
+func (u *GroupUpsertOne) AddMaxConcurrent(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxConcurrent(v)
+	})
+}
+
+// UpdateMaxConcurrent sets the "max_concurrent" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateMaxConcurrent() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateMaxConcurrent()
+	})
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (u *GroupUpsertOne) SetEnableAntiBan(v bool) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetEnableAntiBan(v)
+	})
+}
+
+// UpdateEnableAntiBan sets the "enable_anti_ban" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateEnableAntiBan() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateEnableAntiBan()
+	})
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (u *GroupUpsertOne) SetSessionIsolation(v bool) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSessionIsolation(v)
+	})
+}
+
+// UpdateSessionIsolation sets the "session_isolation" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateSessionIsolation() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSessionIsolation()
+	})
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (u *GroupUpsertOne) SetTrafficJitter(v bool) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetTrafficJitter(v)
+	})
+}
+
+// UpdateTrafficJitter sets the "traffic_jitter" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateTrafficJitter() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateTrafficJitter()
 	})
 }
 
@@ -3154,6 +3467,90 @@ func (u *GroupUpsertBulk) SetDefaultMappedModel(v string) *GroupUpsertBulk {
 func (u *GroupUpsertBulk) UpdateDefaultMappedModel() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateDefaultMappedModel()
+	})
+}
+
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (u *GroupUpsertBulk) SetFrequencyPeriod(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetFrequencyPeriod(v)
+	})
+}
+
+// AddFrequencyPeriod adds v to the "frequency_period" field.
+func (u *GroupUpsertBulk) AddFrequencyPeriod(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddFrequencyPeriod(v)
+	})
+}
+
+// UpdateFrequencyPeriod sets the "frequency_period" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateFrequencyPeriod() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateFrequencyPeriod()
+	})
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (u *GroupUpsertBulk) SetMaxConcurrent(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetMaxConcurrent(v)
+	})
+}
+
+// AddMaxConcurrent adds v to the "max_concurrent" field.
+func (u *GroupUpsertBulk) AddMaxConcurrent(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxConcurrent(v)
+	})
+}
+
+// UpdateMaxConcurrent sets the "max_concurrent" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateMaxConcurrent() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateMaxConcurrent()
+	})
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (u *GroupUpsertBulk) SetEnableAntiBan(v bool) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetEnableAntiBan(v)
+	})
+}
+
+// UpdateEnableAntiBan sets the "enable_anti_ban" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateEnableAntiBan() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateEnableAntiBan()
+	})
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (u *GroupUpsertBulk) SetSessionIsolation(v bool) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetSessionIsolation(v)
+	})
+}
+
+// UpdateSessionIsolation sets the "session_isolation" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateSessionIsolation() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateSessionIsolation()
+	})
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (u *GroupUpsertBulk) SetTrafficJitter(v bool) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetTrafficJitter(v)
+	})
+}
+
+// UpdateTrafficJitter sets the "traffic_jitter" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateTrafficJitter() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateTrafficJitter()
 	})
 }
 

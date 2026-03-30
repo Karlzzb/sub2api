@@ -1518,6 +1518,29 @@ func HasGroupsWith(preds ...predicate.Group) predicate.Account {
 	})
 }
 
+// HasPackageChannels applies the HasEdge predicate on the "package_channels" edge.
+func HasPackageChannels() predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PackageChannelsTable, PackageChannelsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPackageChannelsWith applies the HasEdge predicate on the "package_channels" edge with a given conditions (other predicates).
+func HasPackageChannelsWith(preds ...predicate.PackageChannel) predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := newPackageChannelsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasProxy applies the HasEdge predicate on the "proxy" edge.
 func HasProxy() predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {

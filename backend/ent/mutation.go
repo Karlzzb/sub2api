@@ -20,6 +20,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/errorpassthroughrule"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
@@ -55,6 +56,7 @@ const (
 	TypeErrorPassthroughRule    = "ErrorPassthroughRule"
 	TypeGroup                   = "Group"
 	TypeIdempotencyRecord       = "IdempotencyRecord"
+	TypePackageChannel          = "PackageChannel"
 	TypePromoCode               = "PromoCode"
 	TypePromoCodeUsage          = "PromoCodeUsage"
 	TypeProxy                   = "Proxy"
@@ -2286,6 +2288,9 @@ type AccountMutation struct {
 	groups                    map[int64]struct{}
 	removedgroups             map[int64]struct{}
 	clearedgroups             bool
+	package_channels          map[int64]struct{}
+	removedpackage_channels   map[int64]struct{}
+	clearedpackage_channels   bool
 	proxy                     *int64
 	clearedproxy              bool
 	usage_logs                map[int64]struct{}
@@ -3732,6 +3737,60 @@ func (m *AccountMutation) ResetGroups() {
 	m.removedgroups = nil
 }
 
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by ids.
+func (m *AccountMutation) AddPackageChannelIDs(ids ...int64) {
+	if m.package_channels == nil {
+		m.package_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.package_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPackageChannels clears the "package_channels" edge to the PackageChannel entity.
+func (m *AccountMutation) ClearPackageChannels() {
+	m.clearedpackage_channels = true
+}
+
+// PackageChannelsCleared reports if the "package_channels" edge to the PackageChannel entity was cleared.
+func (m *AccountMutation) PackageChannelsCleared() bool {
+	return m.clearedpackage_channels
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to the PackageChannel entity by IDs.
+func (m *AccountMutation) RemovePackageChannelIDs(ids ...int64) {
+	if m.removedpackage_channels == nil {
+		m.removedpackage_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.package_channels, ids[i])
+		m.removedpackage_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPackageChannels returns the removed IDs of the "package_channels" edge to the PackageChannel entity.
+func (m *AccountMutation) RemovedPackageChannelsIDs() (ids []int64) {
+	for id := range m.removedpackage_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PackageChannelsIDs returns the "package_channels" edge IDs in the mutation.
+func (m *AccountMutation) PackageChannelsIDs() (ids []int64) {
+	for id := range m.package_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPackageChannels resets all changes to the "package_channels" edge.
+func (m *AccountMutation) ResetPackageChannels() {
+	m.package_channels = nil
+	m.clearedpackage_channels = false
+	m.removedpackage_channels = nil
+}
+
 // ClearProxy clears the "proxy" edge to the Proxy entity.
 func (m *AccountMutation) ClearProxy() {
 	m.clearedproxy = true
@@ -4549,9 +4608,12 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.groups != nil {
 		edges = append(edges, account.EdgeGroups)
+	}
+	if m.package_channels != nil {
+		edges = append(edges, account.EdgePackageChannels)
 	}
 	if m.proxy != nil {
 		edges = append(edges, account.EdgeProxy)
@@ -4572,6 +4634,12 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgePackageChannels:
+		ids := make([]ent.Value, 0, len(m.package_channels))
+		for id := range m.package_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	case account.EdgeProxy:
 		if id := m.proxy; id != nil {
 			return []ent.Value{*id}
@@ -4588,9 +4656,12 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedgroups != nil {
 		edges = append(edges, account.EdgeGroups)
+	}
+	if m.removedpackage_channels != nil {
+		edges = append(edges, account.EdgePackageChannels)
 	}
 	if m.removedusage_logs != nil {
 		edges = append(edges, account.EdgeUsageLogs)
@@ -4608,6 +4679,12 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgePackageChannels:
+		ids := make([]ent.Value, 0, len(m.removedpackage_channels))
+		for id := range m.removedpackage_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	case account.EdgeUsageLogs:
 		ids := make([]ent.Value, 0, len(m.removedusage_logs))
 		for id := range m.removedusage_logs {
@@ -4620,9 +4697,12 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedgroups {
 		edges = append(edges, account.EdgeGroups)
+	}
+	if m.clearedpackage_channels {
+		edges = append(edges, account.EdgePackageChannels)
 	}
 	if m.clearedproxy {
 		edges = append(edges, account.EdgeProxy)
@@ -4639,6 +4719,8 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 	switch name {
 	case account.EdgeGroups:
 		return m.clearedgroups
+	case account.EdgePackageChannels:
+		return m.clearedpackage_channels
 	case account.EdgeProxy:
 		return m.clearedproxy
 	case account.EdgeUsageLogs:
@@ -4664,6 +4746,9 @@ func (m *AccountMutation) ResetEdge(name string) error {
 	switch name {
 	case account.EdgeGroups:
 		m.ResetGroups()
+		return nil
+	case account.EdgePackageChannels:
+		m.ResetPackageChannels()
 		return nil
 	case account.EdgeProxy:
 		m.ResetProxy()
@@ -8254,6 +8339,13 @@ type GroupMutation struct {
 	addsort_order                           *int
 	allow_messages_dispatch                 *bool
 	default_mapped_model                    *string
+	frequency_period                        *int
+	addfrequency_period                     *int
+	max_concurrent                          *int
+	addmax_concurrent                       *int
+	enable_anti_ban                         *bool
+	session_isolation                       *bool
+	traffic_jitter                          *bool
 	clearedFields                           map[string]struct{}
 	api_keys                                map[int64]struct{}
 	removedapi_keys                         map[int64]struct{}
@@ -8273,6 +8365,9 @@ type GroupMutation struct {
 	allowed_users                           map[int64]struct{}
 	removedallowed_users                    map[int64]struct{}
 	clearedallowed_users                    bool
+	package_channels                        map[int64]struct{}
+	removedpackage_channels                 map[int64]struct{}
+	clearedpackage_channels                 bool
 	done                                    bool
 	oldValue                                func(context.Context) (*Group, error)
 	predicates                              []predicate.Group
@@ -10070,6 +10165,226 @@ func (m *GroupMutation) ResetDefaultMappedModel() {
 	m.default_mapped_model = nil
 }
 
+// SetFrequencyPeriod sets the "frequency_period" field.
+func (m *GroupMutation) SetFrequencyPeriod(i int) {
+	m.frequency_period = &i
+	m.addfrequency_period = nil
+}
+
+// FrequencyPeriod returns the value of the "frequency_period" field in the mutation.
+func (m *GroupMutation) FrequencyPeriod() (r int, exists bool) {
+	v := m.frequency_period
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFrequencyPeriod returns the old "frequency_period" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldFrequencyPeriod(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFrequencyPeriod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFrequencyPeriod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFrequencyPeriod: %w", err)
+	}
+	return oldValue.FrequencyPeriod, nil
+}
+
+// AddFrequencyPeriod adds i to the "frequency_period" field.
+func (m *GroupMutation) AddFrequencyPeriod(i int) {
+	if m.addfrequency_period != nil {
+		*m.addfrequency_period += i
+	} else {
+		m.addfrequency_period = &i
+	}
+}
+
+// AddedFrequencyPeriod returns the value that was added to the "frequency_period" field in this mutation.
+func (m *GroupMutation) AddedFrequencyPeriod() (r int, exists bool) {
+	v := m.addfrequency_period
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFrequencyPeriod resets all changes to the "frequency_period" field.
+func (m *GroupMutation) ResetFrequencyPeriod() {
+	m.frequency_period = nil
+	m.addfrequency_period = nil
+}
+
+// SetMaxConcurrent sets the "max_concurrent" field.
+func (m *GroupMutation) SetMaxConcurrent(i int) {
+	m.max_concurrent = &i
+	m.addmax_concurrent = nil
+}
+
+// MaxConcurrent returns the value of the "max_concurrent" field in the mutation.
+func (m *GroupMutation) MaxConcurrent() (r int, exists bool) {
+	v := m.max_concurrent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxConcurrent returns the old "max_concurrent" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldMaxConcurrent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxConcurrent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxConcurrent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxConcurrent: %w", err)
+	}
+	return oldValue.MaxConcurrent, nil
+}
+
+// AddMaxConcurrent adds i to the "max_concurrent" field.
+func (m *GroupMutation) AddMaxConcurrent(i int) {
+	if m.addmax_concurrent != nil {
+		*m.addmax_concurrent += i
+	} else {
+		m.addmax_concurrent = &i
+	}
+}
+
+// AddedMaxConcurrent returns the value that was added to the "max_concurrent" field in this mutation.
+func (m *GroupMutation) AddedMaxConcurrent() (r int, exists bool) {
+	v := m.addmax_concurrent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxConcurrent resets all changes to the "max_concurrent" field.
+func (m *GroupMutation) ResetMaxConcurrent() {
+	m.max_concurrent = nil
+	m.addmax_concurrent = nil
+}
+
+// SetEnableAntiBan sets the "enable_anti_ban" field.
+func (m *GroupMutation) SetEnableAntiBan(b bool) {
+	m.enable_anti_ban = &b
+}
+
+// EnableAntiBan returns the value of the "enable_anti_ban" field in the mutation.
+func (m *GroupMutation) EnableAntiBan() (r bool, exists bool) {
+	v := m.enable_anti_ban
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnableAntiBan returns the old "enable_anti_ban" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldEnableAntiBan(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnableAntiBan is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnableAntiBan requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnableAntiBan: %w", err)
+	}
+	return oldValue.EnableAntiBan, nil
+}
+
+// ResetEnableAntiBan resets all changes to the "enable_anti_ban" field.
+func (m *GroupMutation) ResetEnableAntiBan() {
+	m.enable_anti_ban = nil
+}
+
+// SetSessionIsolation sets the "session_isolation" field.
+func (m *GroupMutation) SetSessionIsolation(b bool) {
+	m.session_isolation = &b
+}
+
+// SessionIsolation returns the value of the "session_isolation" field in the mutation.
+func (m *GroupMutation) SessionIsolation() (r bool, exists bool) {
+	v := m.session_isolation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSessionIsolation returns the old "session_isolation" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldSessionIsolation(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSessionIsolation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSessionIsolation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSessionIsolation: %w", err)
+	}
+	return oldValue.SessionIsolation, nil
+}
+
+// ResetSessionIsolation resets all changes to the "session_isolation" field.
+func (m *GroupMutation) ResetSessionIsolation() {
+	m.session_isolation = nil
+}
+
+// SetTrafficJitter sets the "traffic_jitter" field.
+func (m *GroupMutation) SetTrafficJitter(b bool) {
+	m.traffic_jitter = &b
+}
+
+// TrafficJitter returns the value of the "traffic_jitter" field in the mutation.
+func (m *GroupMutation) TrafficJitter() (r bool, exists bool) {
+	v := m.traffic_jitter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrafficJitter returns the old "traffic_jitter" field's value of the Group entity.
+// If the Group object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupMutation) OldTrafficJitter(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrafficJitter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrafficJitter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrafficJitter: %w", err)
+	}
+	return oldValue.TrafficJitter, nil
+}
+
+// ResetTrafficJitter resets all changes to the "traffic_jitter" field.
+func (m *GroupMutation) ResetTrafficJitter() {
+	m.traffic_jitter = nil
+}
+
 // AddAPIKeyIDs adds the "api_keys" edge to the APIKey entity by ids.
 func (m *GroupMutation) AddAPIKeyIDs(ids ...int64) {
 	if m.api_keys == nil {
@@ -10394,6 +10709,60 @@ func (m *GroupMutation) ResetAllowedUsers() {
 	m.removedallowed_users = nil
 }
 
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by ids.
+func (m *GroupMutation) AddPackageChannelIDs(ids ...int64) {
+	if m.package_channels == nil {
+		m.package_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.package_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPackageChannels clears the "package_channels" edge to the PackageChannel entity.
+func (m *GroupMutation) ClearPackageChannels() {
+	m.clearedpackage_channels = true
+}
+
+// PackageChannelsCleared reports if the "package_channels" edge to the PackageChannel entity was cleared.
+func (m *GroupMutation) PackageChannelsCleared() bool {
+	return m.clearedpackage_channels
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to the PackageChannel entity by IDs.
+func (m *GroupMutation) RemovePackageChannelIDs(ids ...int64) {
+	if m.removedpackage_channels == nil {
+		m.removedpackage_channels = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.package_channels, ids[i])
+		m.removedpackage_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPackageChannels returns the removed IDs of the "package_channels" edge to the PackageChannel entity.
+func (m *GroupMutation) RemovedPackageChannelsIDs() (ids []int64) {
+	for id := range m.removedpackage_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PackageChannelsIDs returns the "package_channels" edge IDs in the mutation.
+func (m *GroupMutation) PackageChannelsIDs() (ids []int64) {
+	for id := range m.package_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPackageChannels resets all changes to the "package_channels" edge.
+func (m *GroupMutation) ResetPackageChannels() {
+	m.package_channels = nil
+	m.clearedpackage_channels = false
+	m.removedpackage_channels = nil
+}
+
 // Where appends a list predicates to the GroupMutation builder.
 func (m *GroupMutation) Where(ps ...predicate.Group) {
 	m.predicates = append(m.predicates, ps...)
@@ -10428,7 +10797,7 @@ func (m *GroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupMutation) Fields() []string {
-	fields := make([]string, 0, 32)
+	fields := make([]string, 0, 37)
 	if m.created_at != nil {
 		fields = append(fields, group.FieldCreatedAt)
 	}
@@ -10525,6 +10894,21 @@ func (m *GroupMutation) Fields() []string {
 	if m.default_mapped_model != nil {
 		fields = append(fields, group.FieldDefaultMappedModel)
 	}
+	if m.frequency_period != nil {
+		fields = append(fields, group.FieldFrequencyPeriod)
+	}
+	if m.max_concurrent != nil {
+		fields = append(fields, group.FieldMaxConcurrent)
+	}
+	if m.enable_anti_ban != nil {
+		fields = append(fields, group.FieldEnableAntiBan)
+	}
+	if m.session_isolation != nil {
+		fields = append(fields, group.FieldSessionIsolation)
+	}
+	if m.traffic_jitter != nil {
+		fields = append(fields, group.FieldTrafficJitter)
+	}
 	return fields
 }
 
@@ -10597,6 +10981,16 @@ func (m *GroupMutation) Field(name string) (ent.Value, bool) {
 		return m.AllowMessagesDispatch()
 	case group.FieldDefaultMappedModel:
 		return m.DefaultMappedModel()
+	case group.FieldFrequencyPeriod:
+		return m.FrequencyPeriod()
+	case group.FieldMaxConcurrent:
+		return m.MaxConcurrent()
+	case group.FieldEnableAntiBan:
+		return m.EnableAntiBan()
+	case group.FieldSessionIsolation:
+		return m.SessionIsolation()
+	case group.FieldTrafficJitter:
+		return m.TrafficJitter()
 	}
 	return nil, false
 }
@@ -10670,6 +11064,16 @@ func (m *GroupMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldAllowMessagesDispatch(ctx)
 	case group.FieldDefaultMappedModel:
 		return m.OldDefaultMappedModel(ctx)
+	case group.FieldFrequencyPeriod:
+		return m.OldFrequencyPeriod(ctx)
+	case group.FieldMaxConcurrent:
+		return m.OldMaxConcurrent(ctx)
+	case group.FieldEnableAntiBan:
+		return m.OldEnableAntiBan(ctx)
+	case group.FieldSessionIsolation:
+		return m.OldSessionIsolation(ctx)
+	case group.FieldTrafficJitter:
+		return m.OldTrafficJitter(ctx)
 	}
 	return nil, fmt.Errorf("unknown Group field %s", name)
 }
@@ -10903,6 +11307,41 @@ func (m *GroupMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDefaultMappedModel(v)
 		return nil
+	case group.FieldFrequencyPeriod:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFrequencyPeriod(v)
+		return nil
+	case group.FieldMaxConcurrent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxConcurrent(v)
+		return nil
+	case group.FieldEnableAntiBan:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnableAntiBan(v)
+		return nil
+	case group.FieldSessionIsolation:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSessionIsolation(v)
+		return nil
+	case group.FieldTrafficJitter:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrafficJitter(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Group field %s", name)
 }
@@ -10959,6 +11398,12 @@ func (m *GroupMutation) AddedFields() []string {
 	if m.addsort_order != nil {
 		fields = append(fields, group.FieldSortOrder)
 	}
+	if m.addfrequency_period != nil {
+		fields = append(fields, group.FieldFrequencyPeriod)
+	}
+	if m.addmax_concurrent != nil {
+		fields = append(fields, group.FieldMaxConcurrent)
+	}
 	return fields
 }
 
@@ -10999,6 +11444,10 @@ func (m *GroupMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedFallbackGroupIDOnInvalidRequest()
 	case group.FieldSortOrder:
 		return m.AddedSortOrder()
+	case group.FieldFrequencyPeriod:
+		return m.AddedFrequencyPeriod()
+	case group.FieldMaxConcurrent:
+		return m.AddedMaxConcurrent()
 	}
 	return nil, false
 }
@@ -11119,6 +11568,20 @@ func (m *GroupMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSortOrder(v)
+		return nil
+	case group.FieldFrequencyPeriod:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFrequencyPeriod(v)
+		return nil
+	case group.FieldMaxConcurrent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxConcurrent(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Group numeric field %s", name)
@@ -11336,13 +11799,28 @@ func (m *GroupMutation) ResetField(name string) error {
 	case group.FieldDefaultMappedModel:
 		m.ResetDefaultMappedModel()
 		return nil
+	case group.FieldFrequencyPeriod:
+		m.ResetFrequencyPeriod()
+		return nil
+	case group.FieldMaxConcurrent:
+		m.ResetMaxConcurrent()
+		return nil
+	case group.FieldEnableAntiBan:
+		m.ResetEnableAntiBan()
+		return nil
+	case group.FieldSessionIsolation:
+		m.ResetSessionIsolation()
+		return nil
+	case group.FieldTrafficJitter:
+		m.ResetTrafficJitter()
+		return nil
 	}
 	return fmt.Errorf("unknown Group field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GroupMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.api_keys != nil {
 		edges = append(edges, group.EdgeAPIKeys)
 	}
@@ -11360,6 +11838,9 @@ func (m *GroupMutation) AddedEdges() []string {
 	}
 	if m.allowed_users != nil {
 		edges = append(edges, group.EdgeAllowedUsers)
+	}
+	if m.package_channels != nil {
+		edges = append(edges, group.EdgePackageChannels)
 	}
 	return edges
 }
@@ -11404,13 +11885,19 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgePackageChannels:
+		ids := make([]ent.Value, 0, len(m.package_channels))
+		for id := range m.package_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GroupMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedapi_keys != nil {
 		edges = append(edges, group.EdgeAPIKeys)
 	}
@@ -11428,6 +11915,9 @@ func (m *GroupMutation) RemovedEdges() []string {
 	}
 	if m.removedallowed_users != nil {
 		edges = append(edges, group.EdgeAllowedUsers)
+	}
+	if m.removedpackage_channels != nil {
+		edges = append(edges, group.EdgePackageChannels)
 	}
 	return edges
 }
@@ -11472,13 +11962,19 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case group.EdgePackageChannels:
+		ids := make([]ent.Value, 0, len(m.removedpackage_channels))
+		for id := range m.removedpackage_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GroupMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedapi_keys {
 		edges = append(edges, group.EdgeAPIKeys)
 	}
@@ -11496,6 +11992,9 @@ func (m *GroupMutation) ClearedEdges() []string {
 	}
 	if m.clearedallowed_users {
 		edges = append(edges, group.EdgeAllowedUsers)
+	}
+	if m.clearedpackage_channels {
+		edges = append(edges, group.EdgePackageChannels)
 	}
 	return edges
 }
@@ -11516,6 +12015,8 @@ func (m *GroupMutation) EdgeCleared(name string) bool {
 		return m.clearedaccounts
 	case group.EdgeAllowedUsers:
 		return m.clearedallowed_users
+	case group.EdgePackageChannels:
+		return m.clearedpackage_channels
 	}
 	return false
 }
@@ -11549,6 +12050,9 @@ func (m *GroupMutation) ResetEdge(name string) error {
 		return nil
 	case group.EdgeAllowedUsers:
 		m.ResetAllowedUsers()
+		return nil
+	case group.EdgePackageChannels:
+		m.ResetPackageChannels()
 		return nil
 	}
 	return fmt.Errorf("unknown Group edge %s", name)
@@ -12534,6 +13038,825 @@ func (m *IdempotencyRecordMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *IdempotencyRecordMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown IdempotencyRecord edge %s", name)
+}
+
+// PackageChannelMutation represents an operation that mutates the PackageChannel nodes in the graph.
+type PackageChannelMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int64
+	created_at     *time.Time
+	updated_at     *time.Time
+	weight         *int
+	addweight      *int
+	max_users      *int
+	addmax_users   *int
+	is_enabled     *bool
+	clearedFields  map[string]struct{}
+	group          *int64
+	clearedgroup   bool
+	account        *int64
+	clearedaccount bool
+	done           bool
+	oldValue       func(context.Context) (*PackageChannel, error)
+	predicates     []predicate.PackageChannel
+}
+
+var _ ent.Mutation = (*PackageChannelMutation)(nil)
+
+// packagechannelOption allows management of the mutation configuration using functional options.
+type packagechannelOption func(*PackageChannelMutation)
+
+// newPackageChannelMutation creates new mutation for the PackageChannel entity.
+func newPackageChannelMutation(c config, op Op, opts ...packagechannelOption) *PackageChannelMutation {
+	m := &PackageChannelMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePackageChannel,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPackageChannelID sets the ID field of the mutation.
+func withPackageChannelID(id int64) packagechannelOption {
+	return func(m *PackageChannelMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PackageChannel
+		)
+		m.oldValue = func(ctx context.Context) (*PackageChannel, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PackageChannel.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPackageChannel sets the old PackageChannel of the mutation.
+func withPackageChannel(node *PackageChannel) packagechannelOption {
+	return func(m *PackageChannelMutation) {
+		m.oldValue = func(context.Context) (*PackageChannel, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PackageChannelMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PackageChannelMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PackageChannelMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PackageChannelMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PackageChannel.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PackageChannelMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PackageChannelMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PackageChannelMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PackageChannelMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PackageChannelMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PackageChannelMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *PackageChannelMutation) SetGroupID(i int64) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *PackageChannelMutation) GroupID() (r int64, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldGroupID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *PackageChannelMutation) ResetGroupID() {
+	m.group = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *PackageChannelMutation) SetAccountID(i int64) {
+	m.account = &i
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *PackageChannelMutation) AccountID() (r int64, exists bool) {
+	v := m.account
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldAccountID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *PackageChannelMutation) ResetAccountID() {
+	m.account = nil
+}
+
+// SetWeight sets the "weight" field.
+func (m *PackageChannelMutation) SetWeight(i int) {
+	m.weight = &i
+	m.addweight = nil
+}
+
+// Weight returns the value of the "weight" field in the mutation.
+func (m *PackageChannelMutation) Weight() (r int, exists bool) {
+	v := m.weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeight returns the old "weight" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldWeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeight: %w", err)
+	}
+	return oldValue.Weight, nil
+}
+
+// AddWeight adds i to the "weight" field.
+func (m *PackageChannelMutation) AddWeight(i int) {
+	if m.addweight != nil {
+		*m.addweight += i
+	} else {
+		m.addweight = &i
+	}
+}
+
+// AddedWeight returns the value that was added to the "weight" field in this mutation.
+func (m *PackageChannelMutation) AddedWeight() (r int, exists bool) {
+	v := m.addweight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetWeight resets all changes to the "weight" field.
+func (m *PackageChannelMutation) ResetWeight() {
+	m.weight = nil
+	m.addweight = nil
+}
+
+// SetMaxUsers sets the "max_users" field.
+func (m *PackageChannelMutation) SetMaxUsers(i int) {
+	m.max_users = &i
+	m.addmax_users = nil
+}
+
+// MaxUsers returns the value of the "max_users" field in the mutation.
+func (m *PackageChannelMutation) MaxUsers() (r int, exists bool) {
+	v := m.max_users
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxUsers returns the old "max_users" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldMaxUsers(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxUsers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxUsers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxUsers: %w", err)
+	}
+	return oldValue.MaxUsers, nil
+}
+
+// AddMaxUsers adds i to the "max_users" field.
+func (m *PackageChannelMutation) AddMaxUsers(i int) {
+	if m.addmax_users != nil {
+		*m.addmax_users += i
+	} else {
+		m.addmax_users = &i
+	}
+}
+
+// AddedMaxUsers returns the value that was added to the "max_users" field in this mutation.
+func (m *PackageChannelMutation) AddedMaxUsers() (r int, exists bool) {
+	v := m.addmax_users
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxUsers resets all changes to the "max_users" field.
+func (m *PackageChannelMutation) ResetMaxUsers() {
+	m.max_users = nil
+	m.addmax_users = nil
+}
+
+// SetIsEnabled sets the "is_enabled" field.
+func (m *PackageChannelMutation) SetIsEnabled(b bool) {
+	m.is_enabled = &b
+}
+
+// IsEnabled returns the value of the "is_enabled" field in the mutation.
+func (m *PackageChannelMutation) IsEnabled() (r bool, exists bool) {
+	v := m.is_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsEnabled returns the old "is_enabled" field's value of the PackageChannel entity.
+// If the PackageChannel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PackageChannelMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsEnabled: %w", err)
+	}
+	return oldValue.IsEnabled, nil
+}
+
+// ResetIsEnabled resets all changes to the "is_enabled" field.
+func (m *PackageChannelMutation) ResetIsEnabled() {
+	m.is_enabled = nil
+}
+
+// ClearGroup clears the "group" edge to the Group entity.
+func (m *PackageChannelMutation) ClearGroup() {
+	m.clearedgroup = true
+	m.clearedFields[packagechannel.FieldGroupID] = struct{}{}
+}
+
+// GroupCleared reports if the "group" edge to the Group entity was cleared.
+func (m *PackageChannelMutation) GroupCleared() bool {
+	return m.clearedgroup
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *PackageChannelMutation) GroupIDs() (ids []int64) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *PackageChannelMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
+// ClearAccount clears the "account" edge to the Account entity.
+func (m *PackageChannelMutation) ClearAccount() {
+	m.clearedaccount = true
+	m.clearedFields[packagechannel.FieldAccountID] = struct{}{}
+}
+
+// AccountCleared reports if the "account" edge to the Account entity was cleared.
+func (m *PackageChannelMutation) AccountCleared() bool {
+	return m.clearedaccount
+}
+
+// AccountIDs returns the "account" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AccountID instead. It exists only for internal usage by the builders.
+func (m *PackageChannelMutation) AccountIDs() (ids []int64) {
+	if id := m.account; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAccount resets all changes to the "account" edge.
+func (m *PackageChannelMutation) ResetAccount() {
+	m.account = nil
+	m.clearedaccount = false
+}
+
+// Where appends a list predicates to the PackageChannelMutation builder.
+func (m *PackageChannelMutation) Where(ps ...predicate.PackageChannel) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PackageChannelMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PackageChannelMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PackageChannel, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PackageChannelMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PackageChannelMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PackageChannel).
+func (m *PackageChannelMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PackageChannelMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, packagechannel.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, packagechannel.FieldUpdatedAt)
+	}
+	if m.group != nil {
+		fields = append(fields, packagechannel.FieldGroupID)
+	}
+	if m.account != nil {
+		fields = append(fields, packagechannel.FieldAccountID)
+	}
+	if m.weight != nil {
+		fields = append(fields, packagechannel.FieldWeight)
+	}
+	if m.max_users != nil {
+		fields = append(fields, packagechannel.FieldMaxUsers)
+	}
+	if m.is_enabled != nil {
+		fields = append(fields, packagechannel.FieldIsEnabled)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PackageChannelMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case packagechannel.FieldCreatedAt:
+		return m.CreatedAt()
+	case packagechannel.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case packagechannel.FieldGroupID:
+		return m.GroupID()
+	case packagechannel.FieldAccountID:
+		return m.AccountID()
+	case packagechannel.FieldWeight:
+		return m.Weight()
+	case packagechannel.FieldMaxUsers:
+		return m.MaxUsers()
+	case packagechannel.FieldIsEnabled:
+		return m.IsEnabled()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PackageChannelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case packagechannel.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case packagechannel.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case packagechannel.FieldGroupID:
+		return m.OldGroupID(ctx)
+	case packagechannel.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case packagechannel.FieldWeight:
+		return m.OldWeight(ctx)
+	case packagechannel.FieldMaxUsers:
+		return m.OldMaxUsers(ctx)
+	case packagechannel.FieldIsEnabled:
+		return m.OldIsEnabled(ctx)
+	}
+	return nil, fmt.Errorf("unknown PackageChannel field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageChannelMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case packagechannel.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case packagechannel.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case packagechannel.FieldGroupID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
+	case packagechannel.FieldAccountID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case packagechannel.FieldWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeight(v)
+		return nil
+	case packagechannel.FieldMaxUsers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxUsers(v)
+		return nil
+	case packagechannel.FieldIsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsEnabled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageChannel field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PackageChannelMutation) AddedFields() []string {
+	var fields []string
+	if m.addweight != nil {
+		fields = append(fields, packagechannel.FieldWeight)
+	}
+	if m.addmax_users != nil {
+		fields = append(fields, packagechannel.FieldMaxUsers)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PackageChannelMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case packagechannel.FieldWeight:
+		return m.AddedWeight()
+	case packagechannel.FieldMaxUsers:
+		return m.AddedMaxUsers()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PackageChannelMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case packagechannel.FieldWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeight(v)
+		return nil
+	case packagechannel.FieldMaxUsers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxUsers(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PackageChannel numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PackageChannelMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PackageChannelMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PackageChannelMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PackageChannel nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PackageChannelMutation) ResetField(name string) error {
+	switch name {
+	case packagechannel.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case packagechannel.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case packagechannel.FieldGroupID:
+		m.ResetGroupID()
+		return nil
+	case packagechannel.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case packagechannel.FieldWeight:
+		m.ResetWeight()
+		return nil
+	case packagechannel.FieldMaxUsers:
+		m.ResetMaxUsers()
+		return nil
+	case packagechannel.FieldIsEnabled:
+		m.ResetIsEnabled()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageChannel field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PackageChannelMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.group != nil {
+		edges = append(edges, packagechannel.EdgeGroup)
+	}
+	if m.account != nil {
+		edges = append(edges, packagechannel.EdgeAccount)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PackageChannelMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case packagechannel.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
+	case packagechannel.EdgeAccount:
+		if id := m.account; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PackageChannelMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PackageChannelMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PackageChannelMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedgroup {
+		edges = append(edges, packagechannel.EdgeGroup)
+	}
+	if m.clearedaccount {
+		edges = append(edges, packagechannel.EdgeAccount)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PackageChannelMutation) EdgeCleared(name string) bool {
+	switch name {
+	case packagechannel.EdgeGroup:
+		return m.clearedgroup
+	case packagechannel.EdgeAccount:
+		return m.clearedaccount
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PackageChannelMutation) ClearEdge(name string) error {
+	switch name {
+	case packagechannel.EdgeGroup:
+		m.ClearGroup()
+		return nil
+	case packagechannel.EdgeAccount:
+		m.ClearAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageChannel unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PackageChannelMutation) ResetEdge(name string) error {
+	switch name {
+	case packagechannel.EdgeGroup:
+		m.ResetGroup()
+		return nil
+	case packagechannel.EdgeAccount:
+		m.ResetAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown PackageChannel edge %s", name)
 }
 
 // PromoCodeMutation represents an operation that mutates the PromoCode nodes in the graph.

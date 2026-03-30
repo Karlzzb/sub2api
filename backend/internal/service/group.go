@@ -61,6 +61,13 @@ type Group struct {
 	AllowMessagesDispatch bool
 	DefaultMappedModel    string
 
+	// 套餐扩展配置（Phase 2）
+	FrequencyPeriod   int
+	MaxConcurrent    int
+	EnableAntiBan    bool
+	SessionIsolation bool
+	TrafficJitter    bool
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 

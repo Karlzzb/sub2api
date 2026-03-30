@@ -243,6 +243,14 @@ func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		groups.PUT("/:id/rate-multipliers", h.Admin.Group.BatchSetGroupRateMultipliers)
 		groups.DELETE("/:id/rate-multipliers", h.Admin.Group.ClearGroupRateMultipliers)
 		groups.GET("/:id/api-keys", h.Admin.Group.GetGroupAPIKeys)
+		// Package settings (Phase 2)
+		groups.GET("/:id/package-settings", h.Admin.Group.GetPackageSettings)
+		groups.PUT("/:id/package-settings", h.Admin.Group.UpdatePackageSettings)
+		// Package channel management
+		groups.GET("/:id/channels", h.Admin.Group.GetChannels)
+		groups.POST("/:id/channels", h.Admin.Group.AddChannel)
+		groups.PUT("/:id/channels/:account_id", h.Admin.Group.UpdateChannel)
+		groups.DELETE("/:id/channels/:account_id", h.Admin.Group.RemoveChannel)
 	}
 }
 

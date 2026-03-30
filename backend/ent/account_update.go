@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
 	"github.com/Wei-Shaw/sub2api/ent/usagelog"
@@ -518,6 +519,21 @@ func (_u *AccountUpdate) AddGroups(v ...*Group) *AccountUpdate {
 	return _u.AddGroupIDs(ids...)
 }
 
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by IDs.
+func (_u *AccountUpdate) AddPackageChannelIDs(ids ...int64) *AccountUpdate {
+	_u.mutation.AddPackageChannelIDs(ids...)
+	return _u
+}
+
+// AddPackageChannels adds the "package_channels" edges to the PackageChannel entity.
+func (_u *AccountUpdate) AddPackageChannels(v ...*PackageChannel) *AccountUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPackageChannelIDs(ids...)
+}
+
 // SetProxy sets the "proxy" edge to the Proxy entity.
 func (_u *AccountUpdate) SetProxy(v *Proxy) *AccountUpdate {
 	return _u.SetProxyID(v.ID)
@@ -562,6 +578,27 @@ func (_u *AccountUpdate) RemoveGroups(v ...*Group) *AccountUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
+}
+
+// ClearPackageChannels clears all "package_channels" edges to the PackageChannel entity.
+func (_u *AccountUpdate) ClearPackageChannels() *AccountUpdate {
+	_u.mutation.ClearPackageChannels()
+	return _u
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to PackageChannel entities by IDs.
+func (_u *AccountUpdate) RemovePackageChannelIDs(ids ...int64) *AccountUpdate {
+	_u.mutation.RemovePackageChannelIDs(ids...)
+	return _u
+}
+
+// RemovePackageChannels removes "package_channels" edges to PackageChannel entities.
+func (_u *AccountUpdate) RemovePackageChannels(v ...*PackageChannel) *AccountUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePackageChannelIDs(ids...)
 }
 
 // ClearProxy clears the "proxy" edge to the Proxy entity.
@@ -862,6 +899,51 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPackageChannelsIDs(); len(nodes) > 0 && !_u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PackageChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.ProxyCleared() {
@@ -1445,6 +1527,21 @@ func (_u *AccountUpdateOne) AddGroups(v ...*Group) *AccountUpdateOne {
 	return _u.AddGroupIDs(ids...)
 }
 
+// AddPackageChannelIDs adds the "package_channels" edge to the PackageChannel entity by IDs.
+func (_u *AccountUpdateOne) AddPackageChannelIDs(ids ...int64) *AccountUpdateOne {
+	_u.mutation.AddPackageChannelIDs(ids...)
+	return _u
+}
+
+// AddPackageChannels adds the "package_channels" edges to the PackageChannel entity.
+func (_u *AccountUpdateOne) AddPackageChannels(v ...*PackageChannel) *AccountUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPackageChannelIDs(ids...)
+}
+
 // SetProxy sets the "proxy" edge to the Proxy entity.
 func (_u *AccountUpdateOne) SetProxy(v *Proxy) *AccountUpdateOne {
 	return _u.SetProxyID(v.ID)
@@ -1489,6 +1586,27 @@ func (_u *AccountUpdateOne) RemoveGroups(v ...*Group) *AccountUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
+}
+
+// ClearPackageChannels clears all "package_channels" edges to the PackageChannel entity.
+func (_u *AccountUpdateOne) ClearPackageChannels() *AccountUpdateOne {
+	_u.mutation.ClearPackageChannels()
+	return _u
+}
+
+// RemovePackageChannelIDs removes the "package_channels" edge to PackageChannel entities by IDs.
+func (_u *AccountUpdateOne) RemovePackageChannelIDs(ids ...int64) *AccountUpdateOne {
+	_u.mutation.RemovePackageChannelIDs(ids...)
+	return _u
+}
+
+// RemovePackageChannels removes "package_channels" edges to PackageChannel entities.
+func (_u *AccountUpdateOne) RemovePackageChannels(v ...*PackageChannel) *AccountUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePackageChannelIDs(ids...)
 }
 
 // ClearProxy clears the "proxy" edge to the Proxy entity.
@@ -1819,6 +1937,51 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPackageChannelsIDs(); len(nodes) > 0 && !_u.mutation.PackageChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PackageChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.PackageChannelsTable,
+			Columns: []string{account.PackageChannelsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(packagechannel.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.ProxyCleared() {

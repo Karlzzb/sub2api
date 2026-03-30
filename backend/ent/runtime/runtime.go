@@ -13,6 +13,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/errorpassthroughrule"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/idempotencyrecord"
+	"github.com/Wei-Shaw/sub2api/ent/packagechannel"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
@@ -464,6 +465,26 @@ func init() {
 	group.DefaultDefaultMappedModel = groupDescDefaultMappedModel.Default.(string)
 	// group.DefaultMappedModelValidator is a validator for the "default_mapped_model" field. It is called by the builders before save.
 	group.DefaultMappedModelValidator = groupDescDefaultMappedModel.Validators[0].(func(string) error)
+	// groupDescFrequencyPeriod is the schema descriptor for frequency_period field.
+	groupDescFrequencyPeriod := groupFields[29].Descriptor()
+	// group.DefaultFrequencyPeriod holds the default value on creation for the frequency_period field.
+	group.DefaultFrequencyPeriod = groupDescFrequencyPeriod.Default.(int)
+	// groupDescMaxConcurrent is the schema descriptor for max_concurrent field.
+	groupDescMaxConcurrent := groupFields[30].Descriptor()
+	// group.DefaultMaxConcurrent holds the default value on creation for the max_concurrent field.
+	group.DefaultMaxConcurrent = groupDescMaxConcurrent.Default.(int)
+	// groupDescEnableAntiBan is the schema descriptor for enable_anti_ban field.
+	groupDescEnableAntiBan := groupFields[31].Descriptor()
+	// group.DefaultEnableAntiBan holds the default value on creation for the enable_anti_ban field.
+	group.DefaultEnableAntiBan = groupDescEnableAntiBan.Default.(bool)
+	// groupDescSessionIsolation is the schema descriptor for session_isolation field.
+	groupDescSessionIsolation := groupFields[32].Descriptor()
+	// group.DefaultSessionIsolation holds the default value on creation for the session_isolation field.
+	group.DefaultSessionIsolation = groupDescSessionIsolation.Default.(bool)
+	// groupDescTrafficJitter is the schema descriptor for traffic_jitter field.
+	groupDescTrafficJitter := groupFields[33].Descriptor()
+	// group.DefaultTrafficJitter holds the default value on creation for the traffic_jitter field.
+	group.DefaultTrafficJitter = groupDescTrafficJitter.Default.(bool)
 	idempotencyrecordMixin := schema.IdempotencyRecord{}.Mixin()
 	idempotencyrecordMixinFields0 := idempotencyrecordMixin[0].Fields()
 	_ = idempotencyrecordMixinFields0
@@ -499,6 +520,33 @@ func init() {
 	idempotencyrecordDescErrorReason := idempotencyrecordFields[6].Descriptor()
 	// idempotencyrecord.ErrorReasonValidator is a validator for the "error_reason" field. It is called by the builders before save.
 	idempotencyrecord.ErrorReasonValidator = idempotencyrecordDescErrorReason.Validators[0].(func(string) error)
+	packagechannelMixin := schema.PackageChannel{}.Mixin()
+	packagechannelMixinFields0 := packagechannelMixin[0].Fields()
+	_ = packagechannelMixinFields0
+	packagechannelFields := schema.PackageChannel{}.Fields()
+	_ = packagechannelFields
+	// packagechannelDescCreatedAt is the schema descriptor for created_at field.
+	packagechannelDescCreatedAt := packagechannelMixinFields0[0].Descriptor()
+	// packagechannel.DefaultCreatedAt holds the default value on creation for the created_at field.
+	packagechannel.DefaultCreatedAt = packagechannelDescCreatedAt.Default.(func() time.Time)
+	// packagechannelDescUpdatedAt is the schema descriptor for updated_at field.
+	packagechannelDescUpdatedAt := packagechannelMixinFields0[1].Descriptor()
+	// packagechannel.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	packagechannel.DefaultUpdatedAt = packagechannelDescUpdatedAt.Default.(func() time.Time)
+	// packagechannel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	packagechannel.UpdateDefaultUpdatedAt = packagechannelDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// packagechannelDescWeight is the schema descriptor for weight field.
+	packagechannelDescWeight := packagechannelFields[2].Descriptor()
+	// packagechannel.DefaultWeight holds the default value on creation for the weight field.
+	packagechannel.DefaultWeight = packagechannelDescWeight.Default.(int)
+	// packagechannelDescMaxUsers is the schema descriptor for max_users field.
+	packagechannelDescMaxUsers := packagechannelFields[3].Descriptor()
+	// packagechannel.DefaultMaxUsers holds the default value on creation for the max_users field.
+	packagechannel.DefaultMaxUsers = packagechannelDescMaxUsers.Default.(int)
+	// packagechannelDescIsEnabled is the schema descriptor for is_enabled field.
+	packagechannelDescIsEnabled := packagechannelFields[4].Descriptor()
+	// packagechannel.DefaultIsEnabled holds the default value on creation for the is_enabled field.
+	packagechannel.DefaultIsEnabled = packagechannelDescIsEnabled.Default.(bool)
 	promocodeFields := schema.PromoCode{}.Fields()
 	_ = promocodeFields
 	// promocodeDescCode is the schema descriptor for code field.

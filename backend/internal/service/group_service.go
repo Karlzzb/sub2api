@@ -218,3 +218,51 @@ func (s *GroupService) GetStats(ctx context.Context, id int64) (map[string]any, 
 
 	return stats, nil
 }
+
+// PackageSettings represents the package-level configuration (Phase 2)
+type PackageSettings struct {
+	FrequencyPeriod   int  `json:"frequency_period"`
+	MaxConcurrent    int  `json:"max_concurrent"`
+	EnableAntiBan     bool `json:"enable_anti_ban"`
+	SessionIsolation  bool `json:"session_isolation"`
+	TrafficJitter     bool `json:"traffic_jitter"`
+}
+
+// GetPackageSettings 读取套餐扩展配置
+func (s *GroupService) GetPackageSettings(ctx context.Context, groupID int64) (*PackageSettings, error) {
+	group, err := s.groupRepo.GetByID(ctx, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("get group: %w", err)
+	}
+	return &PackageSettings{
+		FrequencyPeriod:   group.FrequencyPeriod,
+		MaxConcurrent:    group.MaxConcurrent,
+		EnableAntiBan:     group.EnableAntiBan,
+		SessionIsolation:  group.SessionIsolation,
+		TrafficJitter:     group.TrafficJitter,
+	}, nil
+}
+
+// UpdatePackageSettings 更新套餐扩展配置
+func (s *GroupService) UpdatePackageSettings(ctx context.Context, groupID int64, settings *PackageSettings) error {
+	group, err := s.groupRepo.GetByID(ctx, groupID)
+	if err != nil {
+		return fmt.Errorf("get group: %w", err)
+	}
+
+	group.FrequencyPeriod  = settings.FrequencyPeriod
+	group.MaxConcurrent   = settings.MaxConcurrent
+	group.EnableAntiBan   = settings.EnableAntiBan
+	group.SessionIsolation = settings.SessionIsolation
+	group.TrafficJitter  = settings.TrafficJitter
+
+	if err := s.groupRepo.Update(ctx, group); err != nil {
+		return fmt.Errorf("update group: %w", err)
+	}
+
+	if s.authCacheInvalidator != nil {
+		s.authCacheInvalidator.InvalidateAuthCacheByGroupID(ctx, groupID)
+	}
+
+	return nil
+}

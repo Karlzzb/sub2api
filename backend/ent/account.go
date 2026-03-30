@@ -85,6 +85,8 @@ type Account struct {
 type AccountEdges struct {
 	// Groups holds the value of the groups edge.
 	Groups []*Group `json:"groups,omitempty"`
+	// PackageChannels holds the value of the package_channels edge.
+	PackageChannels []*PackageChannel `json:"package_channels,omitempty"`
 	// Proxy holds the value of the proxy edge.
 	Proxy *Proxy `json:"proxy,omitempty"`
 	// UsageLogs holds the value of the usage_logs edge.
@@ -93,7 +95,7 @@ type AccountEdges struct {
 	AccountGroups []*AccountGroup `json:"account_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // GroupsOrErr returns the Groups value or an error if the edge
@@ -105,12 +107,21 @@ func (e AccountEdges) GroupsOrErr() ([]*Group, error) {
 	return nil, &NotLoadedError{edge: "groups"}
 }
 
+// PackageChannelsOrErr returns the PackageChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) PackageChannelsOrErr() ([]*PackageChannel, error) {
+	if e.loadedTypes[1] {
+		return e.PackageChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "package_channels"}
+}
+
 // ProxyOrErr returns the Proxy value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e AccountEdges) ProxyOrErr() (*Proxy, error) {
 	if e.Proxy != nil {
 		return e.Proxy, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: proxy.Label}
 	}
 	return nil, &NotLoadedError{edge: "proxy"}
@@ -119,7 +130,7 @@ func (e AccountEdges) ProxyOrErr() (*Proxy, error) {
 // UsageLogsOrErr returns the UsageLogs value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) UsageLogsOrErr() ([]*UsageLog, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.UsageLogs, nil
 	}
 	return nil, &NotLoadedError{edge: "usage_logs"}
@@ -128,7 +139,7 @@ func (e AccountEdges) UsageLogsOrErr() ([]*UsageLog, error) {
 // AccountGroupsOrErr returns the AccountGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) AccountGroupsOrErr() ([]*AccountGroup, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.AccountGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "account_groups"}
@@ -375,6 +386,11 @@ func (_m *Account) Value(name string) (ent.Value, error) {
 // QueryGroups queries the "groups" edge of the Account entity.
 func (_m *Account) QueryGroups() *GroupQuery {
 	return NewAccountClient(_m.config).QueryGroups(_m)
+}
+
+// QueryPackageChannels queries the "package_channels" edge of the Account entity.
+func (_m *Account) QueryPackageChannels() *PackageChannelQuery {
+	return NewAccountClient(_m.config).QueryPackageChannels(_m)
 }
 
 // QueryProxy queries the "proxy" edge of the Account entity.

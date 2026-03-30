@@ -73,6 +73,8 @@ const (
 	FieldSessionWindowStatus = "session_window_status"
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
+	// EdgePackageChannels holds the string denoting the package_channels edge name in mutations.
+	EdgePackageChannels = "package_channels"
 	// EdgeProxy holds the string denoting the proxy edge name in mutations.
 	EdgeProxy = "proxy"
 	// EdgeUsageLogs holds the string denoting the usage_logs edge name in mutations.
@@ -86,6 +88,13 @@ const (
 	// GroupsInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupsInverseTable = "groups"
+	// PackageChannelsTable is the table that holds the package_channels relation/edge.
+	PackageChannelsTable = "package_channels"
+	// PackageChannelsInverseTable is the table name for the PackageChannel entity.
+	// It exists in this package in order to avoid circular dependency with the "packagechannel" package.
+	PackageChannelsInverseTable = "package_channels"
+	// PackageChannelsColumn is the table column denoting the package_channels relation/edge.
+	PackageChannelsColumn = "account_id"
 	// ProxyTable is the table that holds the proxy relation/edge.
 	ProxyTable = "accounts"
 	// ProxyInverseTable is the table name for the Proxy entity.
@@ -352,6 +361,20 @@ func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByPackageChannelsCount orders the results by package_channels count.
+func ByPackageChannelsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPackageChannelsStep(), opts...)
+	}
+}
+
+// ByPackageChannels orders the results by package_channels terms.
+func ByPackageChannels(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPackageChannelsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByProxyField orders the results by proxy field.
 func ByProxyField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -391,6 +414,13 @@ func newGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, GroupsTable, GroupsPrimaryKey...),
+	)
+}
+func newPackageChannelsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PackageChannelsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PackageChannelsTable, PackageChannelsColumn),
 	)
 }
 func newProxyStep() *sqlgraph.Step {
